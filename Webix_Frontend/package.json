@@ -20,6 +20,6 @@
   },
   "dependencies": {
     "webix": "^11.2.0",
-    "webix-jet": "^3.0.1"
+    "webix-jet": "^3.0.3"
   }
 }

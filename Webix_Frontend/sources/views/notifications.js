@@ -1,16 +1,21 @@
 import {JetView} from "webix-jet";
+import * as webix from "webix";
+import { NotificationService } from "../services/notification";
 
 export default class NotificationSettingsView extends JetView {
+    STORAGE_KEY = "user_notification_settings";
+    currentAudio = null;
+    
     config() {
         return {
             view: "scrollview",
             scroll: "y",
             body: {
-                cols: [
+                rows: [ 
                     {
                         view: "form",
                         localId: "notifyForm",
-                        width: 0, 
+                        fillspace: true, 
                         borderless: true,
                         elementsConfig: {
                             labelWidth: 250, 
@@ -46,15 +51,14 @@ export default class NotificationSettingsView extends JetView {
                                 localId: "email_group",
                                 padding: { left: 20 },
                                 rows: [
-                                    { view: "checkbox", localId: "security", label: "Security alerts (important account changes)", name: "security_alerts", labelWidth: 320, value: 1 },
-                                    { view: "checkbox", localId: "system", label: "System notifications", name: "system_notif", labelWidth: 320, value: 1 },
-                                    { view: "checkbox", localId: "messages", label: "Messages", name: "messeges", labelWidth: 320 },
-                                    {view: "checkbox", localId: "posts", label: "Post updates", name: "post_updates", labelWidth: 320 }
+                                    { view: "checkbox", label: "Security alerts (important account changes)", name: "security_alerts", labelWidth: 320, value: 1 },
+                                    { view: "checkbox", label: "System notifications", name: "system_notif", labelWidth: 320, value: 1 },
+                                    { view: "checkbox", label: "Messages", name: "messeges", labelWidth: 320 },
+                                    { view: "checkbox", label: "Post updates", name: "post_updates", labelWidth: 320 }
                                 ]
                             },
 
                             { height: 10 },
-
                             { template: "NOTIFICATION FREQUENCY", type: "section", css: { "text-align": "center", "font-size": "18px" } },
                             { 
                                 view: "radio", 
@@ -63,8 +67,8 @@ export default class NotificationSettingsView extends JetView {
                                 value: "instant",
                                 options: [
                                     { id: "instant", value: "Instant (as they happen)" },
-                                    { id: "daily",   value: "Daily Notifications" },
-                                    { id: "do not disturb",   value: "Do not Disturb (Silent)" }
+                                    { id: "daily",   value: "Daily Notifications" },
+                                    { id: "do not disturb",   value: "Do not Disturb (Silent)" }
                                 ]
                             },
 
@@ -77,49 +81,49 @@ export default class NotificationSettingsView extends JetView {
                                 value: 1,
                                 on: {
                                     onChange: (newValue) => {
-                                        const selector = this.$$("sound_selector");
-                                        const volumeSlider = this.$$("volume_slider");
-                                        newValue ? selector.enable() : selector.disable();
-                                        newValue ? volumeSlider.enable() : volumeSlider.disable();
+                                        this.toggleSection("sound_group", newValue);
                                     }
                                 }
                             },
                             {
-                                view: "richselect", 
-                                localId: "sound_selector",
-                                name: "sound_file",
-                                label: "Select Tone",
-                                value: "chime", 
-                                options: [
-                                    { id: "chime",   value: "🎵 Chime (Default)" },
-                                    { id: "bell",    value: "🔔 Bell Alert" },
-                                    { id: "pop",     value: "🎶 Subtle Pop" },
-                                    { id: "arcade",  value: "👾 Arcade Blip" }
-                                ],
-                                on: {
-                                    onChange: (newId) => this.playSound(newId)
-                                }
-                            },
-                            {
-                                view: "slider",
-                                localId: "volume_slider",
-                                label: "Volume",
-                                min: 0,
-                                max: 100,
-                                value: 50,
-                                step: 5,
-                                labelWidth: 120,
-                                on: {
-                                    onChange: (v) => {
-                                        if (this.currentAudio) {
-                                            this.currentAudio.volume = v / 100;
+                                localId: "sound_group",
+                                rows: [
+                                    {
+                                        view: "richselect", 
+                                        localId: "sound_selector",
+                                        name: "sound_file",
+                                        label: "Select Tone",
+                                        value: "chime", 
+                                        options: [
+                                            { id: "chime",   value: "🎵 Chime (Default)" },
+                                            { id: "bell",    value: "🔔 Bell Alert" },
+                                            { id: "pop",     value: "🎶 Subtle Pop" },
+                                            { id: "arcade",  value: "👾 Arcade Blip" }
+                                        ],
+                                        on: {
+                                            onChange: (newId) => this.playSound(newId)
                                         }
-                                        const selectedTone = this.$$("sound_selector").getValue();
-                                        if (selectedTone) {
-                                            this.playSound(selectedTone);
+                                    },
+                                    {
+                                        view: "slider",
+                                        localId: "volume_slider",
+                                        name: "volume", 
+                                        label: "Volume",
+                                        min: 0,
+                                        max: 100,
+                                        value: 50,
+                                        step: 5,
+                                        labelWidth: 120,
+                                        on: {
+                                            onChange: (v) => {
+                                                const selectedTone = this.$$("sound_selector").getValue();
+                                                if (selectedTone) {
+                                                    this.playSound(selectedTone);
+                                                }
+                                            }
                                         }
                                     }
-                                }
+                                ]
                             },
 
                             { height: 30 },
@@ -148,21 +152,47 @@ export default class NotificationSettingsView extends JetView {
             }
         };
     }
+    init() {
+        const form = this.$$("notifyForm");
+        const storedData = webix.storage.local.get(this.STORAGE_KEY);
+        
+        if (storedData) {
+            form.setValues(storedData);
+        } else {
+            this.loadFromAPI(form);
+        }
+        this.updateControlStates(form.getValues());
+    }
+    
+    loadFromAPI(form) {
+        NotificationService.loadSettings()
+            .then(data => {
+                form.setValues(data);
+                webix.storage.local.put(this.STORAGE_KEY, data); 
+                this.updateControlStates(data);
+            })
+            .catch(() => {
+                webix.message({ type: "warning", text: "Could not load settings. Using defaults." });
+                this.resetForm();
+            });
+    }
+    
+    updateControlStates(data) {
+        this.toggleSection("email_group", data.email_enabled);
+
+        this.toggleSection("sound_group", data.sound_enabled);
+    }
 
     toggleSection(groupId, enabled) {
         const container = this.$$(groupId);
-        if (enabled) {
-            container.enable();
-        } else {
-            container.disable();
-        }
+        enabled ? container.enable() : container.disable();
     }
 
     playSound(soundId) {
         const soundUrls = {
-            chime:  "https://assets.mixkit.co/active_storage/sfx/2357/2357-preview.mp3",
-            bell:   "https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3",
-            pop:    "https://assets.mixkit.co/active_storage/sfx/2356/2356-preview.mp3",
+            chime:  "https://assets.mixkit.co/active_storage/sfx/2357/2357-preview.mp3",
+            bell:   "https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3",
+            pop:    "https://assets.mixkit.co/active_storage/sfx/2356/2356-preview.mp3",
             arcade: "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
         };
 
@@ -176,15 +206,29 @@ export default class NotificationSettingsView extends JetView {
             this.currentAudio = new Audio(url);
 
             const slider = this.$$("volume_slider");
-            this.currentAudio.volume = slider ? slider.getValue() / 100 : 0.5;
+            this.currentAudio.volume = slider ? slider.getValue() / 100 : 0.5; 
 
             this.currentAudio.play().catch(e => console.warn("Audio blocked or failed:", e));
         }
     }
 
+    saveSettings() {
+        const form = this.$$("notifyForm");
+        const values = form.getValues();
+
+        NotificationService.saveSettings(values)
+            .then(() => {
+                webix.storage.local.put(this.STORAGE_KEY, values);
+                webix.message({ type: "success", text: "Notification settings saved!" });
+            })
+            .catch(() => {
+                 webix.message({ type: "error", text: "Failed to save settings to server. Check API." });
+            });
+    }
+
     resetForm(){
         const form = this.$$("notifyForm");
-        form.setValues({
+        const defaultValues = {
             email_enabled: 1,
             security_alerts: 1,
             system_notif: 1,
@@ -192,14 +236,15 @@ export default class NotificationSettingsView extends JetView {
             post_updates: 0,
             frequency: "instant",
             sound_enabled: 1,
-            sound_file: "chime"
-        });
-        webix.message("Settings reset to default");
-    }
+            sound_file: "chime",
+            volume: 50 
+        };
+        
+        form.setValues(defaultValues);
+        this.updateControlStates(defaultValues); 
 
-    saveSettings() {
-        const form = this.$$("notifyForm");
-        const values = form.getValues();
-        webix.message("Settings saved"); 
+        webix.storage.local.remove(this.STORAGE_KEY);
+        
+        webix.message("Settings reset to default");
     }
 }

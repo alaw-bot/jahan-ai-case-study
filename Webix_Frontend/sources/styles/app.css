@@ -6,7 +6,6 @@
     opacity: 1;
 }
 
-/*data loading status*/
 .status_good, .status_error, .status_saving{
 	text-align: center;
 	margin-left:-12px;
@@ -18,7 +17,6 @@
 	color:green;
 }
 
-/*login form*/
 .invalid_login .webix_header > div{
     background: #FC3636;
     transition: background 1s;

@@ -6,7 +6,6 @@ export default class NotificationSettingsView extends JetView {
             view: "scrollview",
             scroll: "y",
             body: {
-
                 cols: [
                     {
                         view: "form",
@@ -33,8 +32,7 @@ export default class NotificationSettingsView extends JetView {
                             },
                             { height: 20 },
                             
-                            
-                            { template: "EMAIL NOTIFICATIONS", type: "section", css: { "text-align": "center", "font-size": "18px", } },
+                            { template: "EMAIL NOTIFICATIONS", type: "section", css: { "text-align": "center", "font-size": "18px" } },
                             { 
                                 view: "switch", 
                                 label: "Enable Email Notifications", 
@@ -50,12 +48,13 @@ export default class NotificationSettingsView extends JetView {
                                 rows: [
                                     { view: "checkbox", localId: "security", label: "Security alerts (important account changes)", name: "security_alerts", labelWidth: 320, value: 1 },
                                     { view: "checkbox", localId: "system", label: "System notifications", name: "system_notif", labelWidth: 320, value: 1 },
-                                    { view: "checkbox", localId: "activity", label: "Activity updates", name: "activity_updates", labelWidth: 320 }
+                                    { view: "checkbox", localId: "messages", label: "Messages", name: "messeges", labelWidth: 320 },
+                                    {view: "checkbox", localId: "posts", label: "Post updates", name: "post_updates", labelWidth: 320 }
                                 ]
                             },
 
-                         
                             { height: 10 },
+
                             { template: "NOTIFICATION FREQUENCY", type: "section", css: { "text-align": "center", "font-size": "18px" } },
                             { 
                                 view: "radio", 
@@ -64,12 +63,11 @@ export default class NotificationSettingsView extends JetView {
                                 value: "instant",
                                 options: [
                                     { id: "instant", value: "Instant (as they happen)" },
-                                    { id: "daily",   value: "Daily digest" },
-                                    { id: "never",   value: "Never (pause all notifications)" }
+                                    { id: "daily",   value: "Daily Notifications" },
+                                    { id: "do not disturb",   value: "Do not Disturb (Silent)" }
                                 ]
                             },
 
-                      
                             { height: 10 },
                             { template: "NOTIFICATION SOUND", type: "section", css: { "text-align": "center", "font-size": "18px" } },
                             { 
@@ -80,7 +78,9 @@ export default class NotificationSettingsView extends JetView {
                                 on: {
                                     onChange: (newValue) => {
                                         const selector = this.$$("sound_selector");
+                                        const volumeSlider = this.$$("volume_slider");
                                         newValue ? selector.enable() : selector.disable();
+                                        newValue ? volumeSlider.enable() : volumeSlider.disable();
                                     }
                                 }
                             },
@@ -100,10 +100,29 @@ export default class NotificationSettingsView extends JetView {
                                     onChange: (newId) => this.playSound(newId)
                                 }
                             },
+                            {
+                                view: "slider",
+                                localId: "volume_slider",
+                                label: "Volume",
+                                min: 0,
+                                max: 100,
+                                value: 50,
+                                step: 5,
+                                labelWidth: 120,
+                                on: {
+                                    onChange: (v) => {
+                                        if (this.currentAudio) {
+                                            this.currentAudio.volume = v / 100;
+                                        }
+                                        const selectedTone = this.$$("sound_selector").getValue();
+                                        if (selectedTone) {
+                                            this.playSound(selectedTone);
+                                        }
+                                    }
+                                }
+                            },
 
-                            { height: 30 }, 
-
-                     
+                            { height: 30 },
                             { 
                                 cols: [
                                     {}, 
@@ -139,7 +158,6 @@ export default class NotificationSettingsView extends JetView {
         }
     }
 
-
     playSound(soundId) {
         const soundUrls = {
             chime:  "https://assets.mixkit.co/active_storage/sfx/2357/2357-preview.mp3",
@@ -154,9 +172,12 @@ export default class NotificationSettingsView extends JetView {
                 this.currentAudio.pause();
                 this.currentAudio.currentTime = 0;
             }
-            
+
             this.currentAudio = new Audio(url);
-            this.currentAudio.volume = 0.5;
+
+            const slider = this.$$("volume_slider");
+            this.currentAudio.volume = slider ? slider.getValue() / 100 : 0.5;
+
             this.currentAudio.play().catch(e => console.warn("Audio blocked or failed:", e));
         }
     }
@@ -167,6 +188,8 @@ export default class NotificationSettingsView extends JetView {
             email_enabled: 1,
             security_alerts: 1,
             system_notif: 1,
+            messages: 0,
+            post_updates: 0,
             frequency: "instant",
             sound_enabled: 1,
             sound_file: "chime"
@@ -174,10 +197,9 @@ export default class NotificationSettingsView extends JetView {
         webix.message("Settings reset to default");
     }
 
-
     saveSettings() {
         const form = this.$$("notifyForm");
         const values = form.getValues();
-        
+        webix.message("Settings saved"); 
     }
 }

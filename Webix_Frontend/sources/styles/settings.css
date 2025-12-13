@@ -1,0 +1,97 @@
+.sidebar-custom .webix_sidebar {
+    background-color: #ffffff;
+}
+
+
+.sidebar-custom .webix_sidebar .webix_list_item {
+    font-weight: 600;
+    font-size: 16px;
+    padding: 14px 20px;
+    color: #2c2c2c !important; 
+    transition: background 0.3s, color 0.3s;
+}
+
+
+.sidebar-custom .webix_sidebar .webix_icon {
+    color: #555 !important;  
+    font-size: 18px;
+}
+
+
+.sidebar-custom .webix_sidebar .webix_list_item:hover {
+    background-color: rgba(0, 120, 215, 0.12);
+    color: #005bb5 !important;
+}
+
+.sidebar-custom .webix_sidebar .webix_list_item:hover .webix_icon {
+    color: #005bb5 !important;
+}
+
+
+.sidebar-custom .webix_sidebar .webix_list_item.webix_selected {
+    background-color: #0078d7;
+    color: #ffffff !important;
+    border-radius: 6px;
+}
+
+.sidebar-custom .webix_sidebar .webix_list_item.webix_selected .webix_icon {
+    color: #ffffff !important;
+}
+
+
+.app-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #0078d7;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.app-logo img {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+}
+
+.logout-item {
+    cursor: pointer;
+    border-top: 1px solid #fffcfc;
+}
+
+.logout-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 22px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #b91c1c; 
+}
+
+.logout-content .webix_icon {
+    font-size: 20px;
+}
+
+.logout-content:hover {
+    background-color: rgba(185, 28, 28, 0.1);
+}
+.app-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+}
+
+.app-logo-image {
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+}
+
+.app-logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0078d7;
+}

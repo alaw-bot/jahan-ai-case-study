@@ -8,14 +8,13 @@ export default class ThemeSettingsView extends JetView {
             scroll: "y",
             body: {
                 cols: [
-                    {},
                     {
                         view: "form",
                         localId: "themeForm",
                         width: 600,
                         borderless: true,
                         elementsConfig: {
-                            labelWidth: 220,
+                            labelWidth: 250,
                             bottomPadding: 18
                         },
                         elements: [

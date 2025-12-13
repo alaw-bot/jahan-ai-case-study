@@ -1,27 +1,24 @@
 import { JetView } from "webix-jet";
-import * as webix from "webix";
-import { PrivacyService } from "../services/privacy"; 
 
 export default class PrivacySettingsView extends JetView {
-    STORAGE_KEY = "user_privacy_settings";
-
     config() {
         return {
             view: "scrollview",
             scroll: "y",
             body: {
-
-                rows: [
+                cols: [
                     {
                         view: "form",
                         localId: "privacyForm",
-                        fillspace: true,
+                        width: 0,
                         borderless: true,
                         elementsConfig: {
                             labelWidth: 250,
                             bottomPadding: 18
                         },
                         elements: [
+
+                            // HEADER
                             {
                                 rows: [
                                     { template: "Privacy Settings", type: "header", borderless: true, css: "webix_header_l" },
@@ -101,16 +98,11 @@ export default class PrivacySettingsView extends JetView {
                             },
 
                             { height: 30 },
+
+                            // BUTTONS
                             {
                                 cols: [
-                                    {
-                                        view: "button",
-                                        value: "Delete Account",
-                                        css: "webix_danger",
-                                        width: 140,
-                                        click: () => this.deleteAccount()
-                                    },
-                                    {}, 
+                                    {},
                                     {
                                         view: "button",
                                         value: "Reset",
@@ -125,75 +117,51 @@ export default class PrivacySettingsView extends JetView {
                                         click: () => this.saveSettings()
                                     }
                                 ]
-                            }, 
+                            },
+
+                            { height: 30 },
+
+                            // DELETE ACCOUNT
+                            {
+                                view: "button",
+                                value: "Delete Account",
+                                css: "webix_danger",
+                                // width: 200,
+                                click: () => this.deleteAccount()
+                            },
+
                             { height: 50 }
                         ]
-                    },
-                    {} 
+                    }
                 ]
             }
         };
     }
-    init() {
-        const form = this.$$("privacyForm");
-        const storedData = webix.storage.local.get(this.STORAGE_KEY);
-        
-        if (storedData) {
-            form.setValues(storedData);
-            webix.message({ type: "info", text: "Settings loaded from browser session." });
-        } else {
-            this.loadFromAPI(form);
-        }
 
-        this.update2FAState(form.getValues().two_factor);
-    }
-    loadFromAPI(form) {
-        PrivacyService.loadSettings()
-            .then(data => {
-                form.setValues(data);
-                webix.storage.local.put(this.STORAGE_KEY, data); 
-                webix.message({ type: "success", text: "Settings fetched from server." });
-            })
-            .catch(() => {
-                webix.message({ type: "error", text: "Could not load settings from server. Using defaults." });
-                this.resetForm(); 
-            });
-    }
-
-    update2FAState(value) {
-        const selector = this.$$("two_factor_method");
-        value ? selector.enable() : selector.disable();
-    }
-
-    saveSettings() {
-        const form = this.$$("privacyForm");
-        const values = form.getValues();
-
-        PrivacyService.saveSettings(values)
-            .then(() => {
-                webix.storage.local.put(this.STORAGE_KEY, values);
-                webix.message({ type: "success", text: "Saved permanently & session updated!" });
-            })
-            .catch(() => {
-                 webix.message({ type: "error", text: "Failed to save settings to server. Check API." });
-            });
+    toggleSection(groupId, enabled) {
+        const container = this.$$(groupId);
+        if (enabled) container.enable();
+        else container.disable();
     }
 
     resetForm() {
         const form = this.$$("privacyForm");
-        const defaultValues = {
+        form.setValues({
             account_privacy: "public",
             show_activity: 1,
             personalized_recommendations: 1,
             two_factor: 0,
             two_factor_method: "mobile"
-        };
-        form.setValues(defaultValues);
-        this.update2FAState(0);
-        
-        webix.storage.local.remove(this.STORAGE_KEY);
-        
+        });
+        this.$$("two_factor_method").disable();
         webix.message("Privacy settings reset to default");
+    }
+
+    saveSettings() {
+        const form = this.$$("privacyForm");
+        const values = form.getValues();
+        console.log("Saved Privacy Settings:", values);
+        webix.message("Privacy settings saved");
     }
 
     deleteAccount() {
@@ -203,8 +171,7 @@ export default class PrivacySettingsView extends JetView {
             ok: "Delete",
             cancel: "Cancel"
         }).then(() => {
-            webix.storage.local.remove(this.STORAGE_KEY);
-            webix.message("Account deletion initiated.");
+            webix.message("Account deleted"); // Add actual deletion logic here
         });
     }
 }

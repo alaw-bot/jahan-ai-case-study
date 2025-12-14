@@ -1,124 +1,128 @@
-import {JetView} from "webix-jet";
+import { JetView } from "webix-jet";
 import * as webix from "webix";
 import { NotificationService } from "../services/notification";
 
 export default class NotificationSettingsView extends JetView {
     STORAGE_KEY = "user_notification_settings";
     currentAudio = null;
-    
+
+    isInitializing = true;
+
     config() {
         return {
             view: "scrollview",
             scroll: "y",
             body: {
-                rows: [ 
+                rows: [
                     {
                         view: "form",
                         localId: "notifyForm",
-                        fillspace: true, 
+                        fillspace: true,
                         borderless: true,
                         elementsConfig: {
-                            labelWidth: 250, 
+                            labelWidth: 250,
                             bottomPadding: 18
                         },
                         elements: [
 
                             {
-                                rows:[
+                                rows: [
                                     { template: "Notification Settings", type: "header", borderless: true, css: "webix_header_l" },
-                                    { 
-                                        template: "Manage how and when you receive notifications", 
-                                        height: 35, 
-                                        borderless: true, 
-                                        css: "webix_el_label", 
-                                        style: "color: #888;" 
+                                    {
+                                        template: "Manage how and when you receive notifications",
+                                        height: 35,
+                                        borderless: true,
+                                        css: "webix_el_label",
+                                        style: "color:#888;"
                                     }
                                 ]
                             },
                             { height: 20 },
-                            
+
                             { template: "EMAIL NOTIFICATIONS", type: "section", css: { "text-align": "center", "font-size": "18px" } },
-                            { 
-                                view: "switch", 
-                                label: "Enable Email Notifications", 
-                                name: "email_enabled", 
+                            {
+                                view: "switch",
+                                label: "Enable Email Notifications",
+                                name: "email_enabled",
                                 value: 1,
                                 on: {
-                                    onChange: (newValue) => this.toggleSection("email_group", newValue)
+                                    onChange: v => this.toggleSection("email_group", v)
                                 }
                             },
                             {
                                 localId: "email_group",
                                 padding: { left: 20 },
                                 rows: [
-                                    { view: "checkbox", label: "Security alerts (important account changes)", name: "security_alerts", labelWidth: 320, value: 1 },
+                                    { view: "checkbox", label: "Security alerts", name: "security_alerts", labelWidth: 320, value: 1 },
                                     { view: "checkbox", label: "System notifications", name: "system_notif", labelWidth: 320, value: 1 },
-                                    { view: "checkbox", label: "Messages", name: "messeges", labelWidth: 320 },
+                                    { view: "checkbox", label: "Messages", name: "messages", labelWidth: 320 },
                                     { view: "checkbox", label: "Post updates", name: "post_updates", labelWidth: 320 }
                                 ]
                             },
 
                             { height: 10 },
                             { template: "NOTIFICATION FREQUENCY", type: "section", css: { "text-align": "center", "font-size": "18px" } },
-                            { 
-                                view: "radio", 
-                                name: "frequency", 
-                                vertical: true, 
+                            {
+                                view: "radio",
+                                name: "frequency",
+                                vertical: true,
                                 value: "instant",
                                 options: [
                                     { id: "instant", value: "Instant (as they happen)" },
-                                    { id: "daily",   value: "Daily Notifications" },
-                                    { id: "do not disturb",   value: "Do not Disturb (Silent)" }
+                                    { id: "daily", value: "Daily Notifications" },
+                                    { id: "dnd", value: "Do not Disturb (Silent)" }
                                 ]
                             },
 
                             { height: 10 },
                             { template: "NOTIFICATION SOUND", type: "section", css: { "text-align": "center", "font-size": "18px" } },
-                            { 
-                                view: "switch", 
-                                label: "Play sound for notifications", 
-                                name: "sound_enabled", 
+                            {
+                                view: "switch",
+                                label: "Play sound for notifications",
+                                name: "sound_enabled",
                                 value: 1,
                                 on: {
-                                    onChange: (newValue) => {
-                                        this.toggleSection("sound_group", newValue);
-                                    }
+                                    onChange: v => this.toggleSection("sound_group", v)
                                 }
                             },
                             {
                                 localId: "sound_group",
                                 rows: [
                                     {
-                                        view: "richselect", 
+                                        view: "richselect",
                                         localId: "sound_selector",
                                         name: "sound_file",
                                         label: "Select Tone",
-                                        value: "chime", 
+                                        value: "chime",
                                         options: [
-                                            { id: "chime",   value: "🎵 Chime (Default)" },
-                                            { id: "bell",    value: "🔔 Bell Alert" },
-                                            { id: "pop",     value: "🎶 Subtle Pop" },
-                                            { id: "arcade",  value: "👾 Arcade Blip" }
+                                            { id: "chime", value: "🎵 Chime" },
+                                            { id: "bell", value: "🔔 Bell" },
+                                            { id: "pop", value: "🎶 Pop" },
+                                            { id: "arcade", value: "👾 Arcade" }
                                         ],
                                         on: {
-                                            onChange: (newId) => this.playSound(newId)
+                                            onChange: id => {
+                                                if (!this.isInitializing) {
+                                                    this.playSound(id);
+                                                }
+                                            }
                                         }
                                     },
                                     {
                                         view: "slider",
                                         localId: "volume_slider",
-                                        name: "volume", 
+                                        name: "volume",
                                         label: "Volume",
                                         min: 0,
                                         max: 100,
-                                        value: 50,
                                         step: 5,
+                                        value: 50,
                                         labelWidth: 120,
                                         on: {
-                                            onChange: (v) => {
-                                                const selectedTone = this.$$("sound_selector").getValue();
-                                                if (selectedTone) {
-                                                    this.playSound(selectedTone);
+                                            onChange: () => {
+                                                if (!this.isInitializing) {
+                                                    const tone = this.$$("sound_selector").getValue();
+                                                    this.playSound(tone);
                                                 }
                                             }
                                         }
@@ -127,25 +131,15 @@ export default class NotificationSettingsView extends JetView {
                             },
 
                             { height: 30 },
-                            { 
+                            {
                                 cols: [
-                                    {}, 
-                                    { 
-                                        view: "button", 
-                                        value: "Reset", 
-                                        width: 100, 
-                                        click: () => this.resetForm() 
-                                    },
-                                    { 
-                                        view: "button", 
-                                        value: "Save Changes", 
-                                        css: "webix_primary", 
-                                        width: 140, 
-                                        click: () => this.saveSettings() 
-                                    }
+                                    {},
+                                    { view: "button", value: "Reset", width: 100, click: () => this.resetForm() },
+                                    { view: "button", value: "Save Changes", css: "webix_primary", width: 140, click: () => this.saveSettings() }
                                 ]
                             },
-                            { height: 50 } 
+
+                            { height: 50 }
                         ]
                     }
                 ]
@@ -154,81 +148,79 @@ export default class NotificationSettingsView extends JetView {
     }
     init() {
         const form = this.$$("notifyForm");
-        const storedData = webix.storage.local.get(this.STORAGE_KEY);
-        
-        if (storedData) {
-            form.setValues(storedData);
+        const stored = webix.storage.local.get(this.STORAGE_KEY);
+
+        if (stored) {
+            form.setValues(stored);
+            this.updateControlStates(stored);
         } else {
             this.loadFromAPI(form);
         }
-        this.updateControlStates(form.getValues());
+        this.isInitializing = false;
     }
-    
+
     loadFromAPI(form) {
         NotificationService.loadSettings()
             .then(data => {
                 form.setValues(data);
-                webix.storage.local.put(this.STORAGE_KEY, data); 
+                webix.storage.local.put(this.STORAGE_KEY, data);
                 this.updateControlStates(data);
+                this.isInitializing = false;
             })
             .catch(() => {
-                webix.message({ type: "warning", text: "Could not load settings. Using defaults." });
+                webix.message("Using default settings");
                 this.resetForm();
             });
     }
-    
+
     updateControlStates(data) {
         this.toggleSection("email_group", data.email_enabled);
-
         this.toggleSection("sound_group", data.sound_enabled);
     }
 
-    toggleSection(groupId, enabled) {
-        const container = this.$$(groupId);
-        enabled ? container.enable() : container.disable();
+    toggleSection(id, enabled) {
+        const ui = this.$$(id);
+        enabled ? ui.enable() : ui.disable();
     }
-
     playSound(soundId) {
-        const soundUrls = {
-            chime:  "https://assets.mixkit.co/active_storage/sfx/2357/2357-preview.mp3",
-            bell:   "https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3",
-            pop:    "https://assets.mixkit.co/active_storage/sfx/2356/2356-preview.mp3",
+        if (!soundId) return;
+
+        const sounds = {
+            chime: "https://assets.mixkit.co/active_storage/sfx/2357/2357-preview.mp3",
+            bell: "https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3",
+            pop: "https://assets.mixkit.co/active_storage/sfx/2356/2356-preview.mp3",
             arcade: "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
         };
 
-        const url = soundUrls[soundId];
-        if (url) {
-            if (this.currentAudio) {
-                this.currentAudio.pause();
-                this.currentAudio.currentTime = 0;
-            }
+        const url = sounds[soundId];
+        if (!url) return;
 
-            this.currentAudio = new Audio(url);
-
-            const slider = this.$$("volume_slider");
-            this.currentAudio.volume = slider ? slider.getValue() / 100 : 0.5; 
-
-            this.currentAudio.play().catch(e => console.warn("Audio blocked or failed:", e));
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+            this.currentAudio.currentTime = 0;
         }
+
+        this.currentAudio = new Audio(url);
+
+        const volume = this.$$("volume_slider").getValue();
+        this.currentAudio.volume = volume / 100;
+
+        this.currentAudio.play().catch(() => {});
     }
 
     saveSettings() {
-        const form = this.$$("notifyForm");
-        const values = form.getValues();
+        const values = this.$$("notifyForm").getValues();
 
         NotificationService.saveSettings(values)
             .then(() => {
                 webix.storage.local.put(this.STORAGE_KEY, values);
-                webix.message({ type: "success", text: "Notification settings saved!" });
+                webix.message("Settings saved");
             })
-            .catch(() => {
-                 webix.message({ type: "error", text: "Failed to save settings to server. Check API." });
-            });
+            .catch(() => webix.message("Save failed"));
     }
 
-    resetForm(){
-        const form = this.$$("notifyForm");
-        const defaultValues = {
+    resetForm() {
+        const defaults = {
             email_enabled: 1,
             security_alerts: 1,
             system_notif: 1,
@@ -237,14 +229,15 @@ export default class NotificationSettingsView extends JetView {
             frequency: "instant",
             sound_enabled: 1,
             sound_file: "chime",
-            volume: 50 
+            volume: 50
         };
-        
-        form.setValues(defaultValues);
-        this.updateControlStates(defaultValues); 
+
+        this.isInitializing = true; 
+        this.$$("notifyForm").setValues(defaults);
+        this.updateControlStates(defaults);
+        this.isInitializing = false;
 
         webix.storage.local.remove(this.STORAGE_KEY);
-        
-        webix.message("Settings reset to default");
+        webix.message("Settings reset");
     }
 }

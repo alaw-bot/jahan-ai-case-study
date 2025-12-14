@@ -25,72 +25,60 @@ export default class SettingsView extends JetView {
             { id: "+49", value: "+49 (DE)" }
         ];
 
-        //SECTION 1: PROFILE INFORMATION 
+        //SECTION 1: PROFILE INFORMATION
         const profileElements = [
             // Header
             {
                 rows: [
-                    { view: "label", label: "Profile Information", css: "section_header" },
-                    { view: "label", label: "Update your photo and personal details", css: "section_subtitle" }
+                    { view: "label", label: "Profile Information", css: "section_header", align: "left" },
+                    { view: "label", label: "Update your photo and personal details", css: "section_subtitle", align: "left" }
                 ]
             },
             { height: 20 },
 
-    
             {
                 cols: [
-                    {}, 
                     {
-
-                        width: 300,
+                        view: "template",
+                        localId: "avatar_preview",
+                        borderless: true,
+                        width: 100, height: 100,
+                        css: "avatar_circle",
+                        template: (obj) => {
+                            if(obj.src) return `<img src="${obj.src}" class="avatar_img">`;
+                            return `<div class="avatar_placeholder">U</div>`;
+                        }
+                    },
+                    { width: 20 },
+                    {
                         rows: [
                             {
-                                cols: [
-                                    {
-                                        view: "template",
-                                        localId: "avatar_preview",
-                                        borderless: true,
-                                        width: 100, height: 100,
-                                        css: "avatar_circle",
-                                        template: (obj) => {
-                                            if(obj.src) return `<img src="${obj.src}" class="avatar_img">`;
-                                            return `<div class="avatar_placeholder">U</div>`;
-                                        }
-                                    },
-                                    { width: 20 },
-                                    {
-                                        rows: [
-                                            {
-                                                view: "uploader",
-                                                value: "Upload New Photo",
-                                                localId: "photo_uploader",
-                                                autosend: false,
-                                                accept: "image/*",
-                                                width: 160,
-                                                css: "webix_primary",
-                                                on: {
-                                                    onBeforeFileAdd: (upload) => {
-                                                        var reader = new FileReader();
-                                                        reader.onload = (e) => this.$$("avatar_preview").setValues({ src: e.target.result });
-                                                        reader.readAsDataURL(upload.file);
-                                                        return false;
-                                                    }
-                                                }
-                                            },
-                                            { height: 5 },
-                                            {
-                                                view: "button",
-                                                value: "Remove Photo",
-                                                width: 160,
-                                                css: "webix_transparent remove_btn",
-                                                click: () => {
-                                                    this.$$("avatar_preview").setValues({ src: "" });
-                                                    webix.message("Photo removed");
-                                                }
-                                            }
-                                        ]
+                                view: "uploader",
+                                value: "Upload New Photo",
+                                localId: "photo_uploader",
+                                autosend: false,
+                                accept: "image/*",
+                                width: 160,
+                                css: "webix_primary",
+                                on: {
+                                    onBeforeFileAdd: (upload) => {
+                                        var reader = new FileReader();
+                                        reader.onload = (e) => this.$$("avatar_preview").setValues({ src: e.target.result });
+                                        reader.readAsDataURL(upload.file);
+                                        return false;
                                     }
-                                ]
+                                }
+                            },
+                            { height: 5 },
+                            {
+                                view: "button",
+                                value: "Remove Photo",
+                                width: 160,
+                                css: "webix_transparent remove_btn",
+                                click: () => {
+                                    this.$$("avatar_preview").setValues({ src: "" });
+                                    webix.message("Photo removed");
+                                }
                             }
                         ]
                     },
@@ -100,7 +88,7 @@ export default class SettingsView extends JetView {
             { height: 20 },
 
             // 2. Basic Details
-            { template: "BASIC INFORMATION", type: "section" },
+            { template: "BASIC INFORMATION", type: "section", align: "left" },
             
             { view: "text", label: "Username", name: "username", localId: "username", placeholder: "e.g. jdoe123", labelWidth: 150, readonly: true },
             { view: "text", label: "Display Name", name: "display_name", localId: "display_name", placeholder: "e.g. John Doe", labelWidth: 150, readonly: true },
@@ -116,10 +104,10 @@ export default class SettingsView extends JetView {
             },
 
             // 3. Contact Info
-            { template: "CONTACT INFORMATION", type: "section" },
+            { template: "CONTACT INFORMATION", type: "section", align: "left" },
 
             { view: "text", label: "Email Address", name: "email", localId: "email", placeholder: "user@example.com", labelWidth: 150, readonly: true },
-            
+
             { 
                 view: "combo", 
                 label: "Country", 
@@ -162,10 +150,10 @@ export default class SettingsView extends JetView {
 
             { height: 20 },
 
-            // ACTION BUTTONS
+            // ACTION BUTTONS 
             { 
                 cols: [
-                    {},
+                    {}, 
                     { 
                         view: "button", 
                         localId: "btn_edit",
@@ -201,7 +189,7 @@ export default class SettingsView extends JetView {
 
         //SECTION 2: PASSWORD AND SECURITY
         const securityElements = [
-            { template: "PASSWORD & SECURITY", type: "section" },
+            { template: "PASSWORD & SECURITY", type: "section", align: "left" },
             { 
                 view: "button", 
                 value: "Change Password", 
@@ -212,19 +200,19 @@ export default class SettingsView extends JetView {
             }
         ];
 
-        // MAIN CONFIGURATION 
+        //MAIN CONFIGURATION 
         return {
             view: "scrollview",
             scroll: "y",
             body: {
                 cols: [
-                    {}, 
+                    {},
                     {
                         view: "form",
                         localId: "mainForm",
-                        width: 900, 
+                        width: 900,
                         borderless: true,
-                        padding: 0,
+                        padding: {top: 20, right: 30, bottom: 20, left: 30},
                         elementsConfig: {
                             labelWidth: 150, 
                             bottomPadding: 18
@@ -232,13 +220,14 @@ export default class SettingsView extends JetView {
                         elements: [
                             { 
                                 rows:[
-                                    { template: "Account Settings", type: "header", borderless: true, css: "webix_header_l" },
+                                    { template: "Account Settings", type: "header", borderless: true, css: "webix_header_l", align: "left" },
                                     { 
                                         template: "Manage your profile, contact info, and security credentials", 
                                         height: 35, 
                                         borderless: true, 
                                         css: "webix_el_label", 
-                                        style: "color: #888;" 
+                                        style: "color: #888;",
+                                        align: "left"
                                     }
                                 ]
                             },
@@ -255,7 +244,7 @@ export default class SettingsView extends JetView {
                             { height: 50 }
                         ]
                     },
-                    {} 
+                    {}
                 ]
             }
         };

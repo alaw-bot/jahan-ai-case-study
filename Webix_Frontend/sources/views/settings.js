@@ -1,6 +1,6 @@
 import { JetView, plugins } from "webix-jet";
 import "../styles/settings.css";
-
+import "webix/webix.css";      
 export default class SettingsPage extends JetView {
 
     config() {
@@ -33,7 +33,7 @@ export default class SettingsPage extends JetView {
                                 { id: "account", value: "Account", icon: "wxi-user" },
                                 { id: "notifications", value: "Notifications", icon: "wxi-bell" },
                                 { id: "theme", value: "Theme", icon: "wxi-pencil" },
-                                { id: "privacy", value: "Privacy", icon: "wxi-lock" }
+                                { id: "privacy", value: "Privacy", icon: "wxi-theif" }
                             ],
                             on: {
                                 onAfterSelect: id => this.show(id)

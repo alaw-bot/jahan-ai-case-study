@@ -1,6 +1,21 @@
 import {JetView} from "webix-jet";
 
 export default class ThemeSettingsView extends JetView {
+    init() {
+        const saved = JSON.parse(localStorage.getItem("app_settings"));
+        
+        if (saved) {
+            this.$$("themeForm").setValues(saved);
+            this.toggleDarkMode(saved.theme_mode);
+            this.updateFontSize(saved.font_size);
+            this.updateFontFamily(saved.font_family);
+            this.updateAccentColor(saved.accent_color);
+            this.toggleHighContrast(saved.high_contrast);
+        } else {
+            this.toggleDarkMode("light");
+        }
+    }
+
     config() {
         return {
             view: "scrollview",
@@ -8,41 +23,33 @@ export default class ThemeSettingsView extends JetView {
             scroll: "y",
             body: {
                 cols: [
+                    {}, 
                     {
                         view: "form",
                         localId: "themeForm",
                         width: 600,
                         borderless: true,
                         elementsConfig: {
-                            labelWidth: 250,
+                            labelWidth: 200,
+                            labelPosition: "top",
                             bottomPadding: 18
                         },
                         elements: [
                             {
                                 rows:[
                                     { template: "Theme Settings", type: "header", borderless: true, css: "webix_header_l" },
-                                    { 
-                                        template: "Customize the appearance of your application", 
-                                        height: 35, 
-                                        borderless: true, 
-                                        css: "webix_el_label", 
-                                        style: "color: #888;" 
-                                    }
+                                    { template: "Customize the appearance of your application", height: 35, borderless: true, css: "description_text" }
                                 ]
                             },
                             { height: 20 },
                             { template: "APPEARANCE", type: "section" },
                             {
+                                paddingY: 10,
                                 rows: [
-                                    { 
-                                        view: "template", 
-                                        template: "Choose how the app looks to you.", 
-                                        height: 30, borderless: true, css: "webix_el_label", style: "font-size: 13px; color: #666;" 
-                                    },
+                                    { view: "template", template: "Choose how the app looks to you.", height: 30, borderless: true, css: "description_text" },
                                     { 
                                         view: "segmented", 
                                         name: "theme_mode",
-                                        value: "light",
                                         height: 50,
                                         options: [
                                             { id: "light", value: "☀️ Light" },
@@ -50,7 +57,10 @@ export default class ThemeSettingsView extends JetView {
                                             { id: "auto",  value: "🔄 Auto" }
                                         ],
                                         on: {
-                                            onChange: (mode) => this.toggleDarkMode(mode)
+                                            onChange: (mode) => {
+                                                this.toggleDarkMode(mode);
+                                                this.autoSave();
+                                            }
                                         }
                                     }
                                 ]
@@ -63,42 +73,31 @@ export default class ThemeSettingsView extends JetView {
                                     {
                                         rows: [
                                             { view: "label", label: "Font Size" },
-                                            { 
-                                                view: "template", 
-                                                template: "Adjust text size for better readability.", 
-                                                height: 40, borderless: true, css: "webix_el_label", style: "font-size: 12px; color: #888;" 
-                                            }
+                                            { view: "template", template: "Adjust text size for better readability.", height: 40, borderless: true, css: "description_text" }
                                         ]
                                     },
                                     {
                                         view: "slider",
                                         name: "font_size",
-                                        min: 12,
-                                        max: 24,
-                                        value: 14,
-                                        step: 1,
+                                        min: 12, max: 24, step: 1,
                                         title: "#value#px",
                                         on: {
                                             onSliderDrag: (v) => this.updateFontSize(v),
-                                            onChange: (v) => this.updateFontSize(v)
+                                            onChange: (v) => {
+                                                this.updateFontSize(v); 
+                                                this.autoSave();
+                                            }
                                         }
                                     },
-                                    { 
-                                        view: "label", 
-                                        localId: "size_label", 
-                                        label: "14px", 
-                                        width: 60, 
-                                        align: "right" 
-                                    }
+                                    { view: "label", localId: "size_label", width: 50, align: "right", css: "value_label", label: "14px" }
                                 ]
                             },
-
-                            { height: 10 },
+                            { height: 15 },
                             {
                                 view: "richselect",
                                 label: "Font Style",
+                                labelPosition: "top",
                                 name: "font_family",
-                                value: "default",
                                 options: [
                                     { id: "default", value: "System Default" },
                                     { id: "sans",    value: "Sans-serif (Arial)" },
@@ -106,32 +105,32 @@ export default class ThemeSettingsView extends JetView {
                                     { id: "mono",    value: "Monospace (Courier)" }
                                 ],
                                 on: {
-                                    onChange: (font) => this.updateFontFamily(font)
+                                    onChange: (val) => {
+                                        this.updateFontFamily(val);
+                                        this.autoSave();
+                                    }
                                 }
                             },
-
-                            { height: 10 },
+                            { height: 20 },
                             { template: "ACCENT COLOR", type: "section" },
                             {
                                 cols: [
                                     {
                                         rows: [
-                                            { view: "label", label: "Accent Color", height: 25 },
-                                            { 
-                                                view: "template", 
-                                                template: "Personalize the look of buttons.", 
-                                                height: 40, borderless: true, css: "webix_el_label", style: "font-size: 12px; color: #888;" 
-                                            }
+                                            { view: "label", label: "Accent Color" },
+                                            { view: "template", template: "Personalize the look of buttons.", height: 40, borderless: true, css: "description_text" }
                                         ]
                                     },
                                     {
                                         view: "colorpicker",
                                         name: "accent_color",
-                                        value: "#1CA1C1",
                                         width: 150,
                                         editable: true,
                                         on: {
-                                            onChange: (color) => this.updateAccentColor(color)
+                                            onChange: (color) => {
+                                                this.updateAccentColor(color);
+                                                this.autoSave();
+                                            }
                                         }
                                     }
                                 ]
@@ -143,71 +142,74 @@ export default class ThemeSettingsView extends JetView {
                                     {
                                         rows: [
                                             { view: "label", label: "High Contrast Mode" },
-                                            { 
-                                                view: "template", 
-                                                template: "Enable high contrast for better visibility.", 
-                                                height: 30, borderless: true, css: "webix_el_label", style: "font-size: 12px; color: #888;" 
-                                            }
+                                            { view: "template", template: "Enable high contrast for better visibility.", height: 30, borderless: true, css: "description_text" }
                                         ]
                                     },
                                     { 
                                         view: "switch", 
                                         name: "high_contrast", 
-                                        value: 0,
                                         width: 60,
                                         on: {
-                                            onChange: (val) => this.toggleHighContrast(val)
+                                            onChange: (val) => {
+                                                this.toggleHighContrast(val);
+                                                this.autoSave();
+                                            }
                                         }
                                     }
                                 ]
                             },
 
-                            { height: 30 },
+                            { height: 40 },
                             { 
                                 cols: [
                                     {}, 
                                     { 
                                         view: "button", 
-                                        value: "Reset Defaults", 
-                                        width: 130, 
+                                        value: "Reset to Defaults", 
+                                        width: 150, 
                                         click: () => this.resetTheme() 
-                                    },
-                                    { 
-                                        view: "button", 
-                                        localId: "save_btn", 
-                                        value: "Save Theme", 
-                                        css: "webix_primary", 
-                                        width: 130, 
-                                        click: () => webix.message("Theme Saved Successfully!")
                                     }
                                 ]
                             },
                             { height: 50 }
                         ]
                     },
-                    {}
+                    {} 
                 ]
             }
         };
     }
 
-    toggleDarkMode(mode) {
-        const mainView = this.$$("theme_scrollview");
-        
-        webix.html.removeCss(mainView.getNode(), "webix_dark");
+    autoSave() {
+        const values = this.$$("themeForm").getValues();
+        localStorage.setItem("app_settings", JSON.stringify(values));
+    }
 
-        if (mode === "dark") {
-            webix.html.addCss(mainView.getNode(), "webix_dark");
-            
-            document.body.style.backgroundColor = "#2b2b2b";
+    toggleDarkMode(mode) {
+        if (this._themeListener) {
+            window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', this._themeListener);
+            this._themeListener = null;
+        }
+        const applyTheme = (isDark) => {
+            isDark ? webix.html.addCss(document.body, "webix_dark") : webix.html.removeCss(document.body, "webix_dark");
+        };
+        if (mode === "auto") {
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(systemDark);
+            this._themeListener = (e) => applyTheme(e.matches);
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this._themeListener);
         } else {
-            document.body.style.backgroundColor = "#ffffff";
+            applyTheme(mode === "dark");
         }
     }
 
+    updateSizeLabel(size) {
+        if(this.$$("size_label")) this.$$("size_label").setValue(`${size}px`);
+    }
+
     updateFontSize(size) {
-        this.$$("size_label").setValue(`${size}px`);
-        this.$$("theme_scrollview").getNode().style.fontSize = `${size}px`;
+        this.updateSizeLabel(size);
+        document.documentElement.style.setProperty('--app-font-size', size + "px");
     }
 
     updateFontFamily(type) {
@@ -215,44 +217,33 @@ export default class ThemeSettingsView extends JetView {
         if (type === "serif") fontStack = "Georgia, serif";
         if (type === "mono")  fontStack = "'Courier New', monospace";
         if (type === "sans")  fontStack = "Arial, sans-serif";
-
-        this.$$("theme_scrollview").getNode().style.fontFamily = fontStack;
+        document.body.style.fontFamily = fontStack;
     }
 
     updateAccentColor(color) {
-        const btn = this.$$("save_btn");
-        const btnNode = btn.$view.querySelector(".webix_button");
-        if (btnNode) {
-            btnNode.style.backgroundColor = color;
-            btnNode.style.borderColor = color;
-        }
     }
 
     toggleHighContrast(enabled) {
-        const node = this.$$("theme_scrollview").getNode();
-        if (enabled) {
-            node.style.filter = "contrast(150%) brightness(90%)";
-        } else {
-            node.style.filter = "none";
-        }
+        document.body.style.filter = enabled ? "contrast(150%) brightness(90%)" : "none";
     }
 
     resetTheme() {
-        this.$$("themeForm").setValues({
+        const defaults = {
             theme_mode: "light",
             font_size: 14,
             font_family: "default",
             accent_color: "#1CA1C1",
             high_contrast: 0
-        });
+        };
 
-
+        this.$$("themeForm").setValues(defaults);
         this.toggleDarkMode("light");
         this.updateFontSize(14);
         this.updateFontFamily("default");
         this.updateAccentColor("#1CA1C1");
         this.toggleHighContrast(0);
-
+        
+        this.autoSave(); 
         webix.message("Restored default theme");
     }
 }

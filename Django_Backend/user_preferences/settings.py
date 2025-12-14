@@ -21,6 +21,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'settings_api',
+    'rest_framework',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -31,9 +34,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
-# ✅ FIXED
 ROOT_URLCONF = 'user_preferences.urls'
 
 TEMPLATES = [
@@ -51,7 +54,6 @@ TEMPLATES = [
     },
 ]
 
-# ✅ FIXED (THIS WAS THE CRASH)
 WSGI_APPLICATION = 'user_preferences.wsgi.application'
 
 DATABASES = {
@@ -76,3 +78,13 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
+}
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173", 
+]
+CORS_ALLOW_CREDENTIALS = True 

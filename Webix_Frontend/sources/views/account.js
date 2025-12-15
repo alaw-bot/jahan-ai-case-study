@@ -109,7 +109,7 @@ export default class SettingsView extends JetView {
             { height: 20 },
 
             // 2. Basic Details
-            { template: "BASIC INFORMATION", type: "section", align: "left" },
+            { template: "BASIC INFORMATION", type: "header", align: "left", },
             { view: "text", label: "Username", name: "username", localId: "username", placeholder: "e.g. jdoe123", labelWidth: 150, readonly: true },
             { view: "text", label: "Display Name", name: "display_name", localId: "display_name", placeholder: "e.g. John Doe", labelWidth: 150, readonly: true },
             
@@ -129,7 +129,7 @@ export default class SettingsView extends JetView {
             { view: "textarea", label: "Bio", name: "bio", localId: "bio", height: 100, placeholder: "Tell us a little about yourself...", labelWidth: 150, readonly: true },
 
             // 3. Contact Info 
-            { template: "CONTACT INFORMATION", type: "section", align: "left" },
+            { template: "CONTACT INFORMATION", type: "header", align: "left" },
             { view: "text", label: "Email Address", name: "email", localId: "email", placeholder: "user@example.com", labelWidth: 150, readonly: true },
             { view: "combo", label: "Country", name: "country", localId: "country", placeholder: "Select country", labelWidth: 150, disabled: true, suggest: { body: { yCount: 5, autoWidth: false, data: countries } } },
             {
@@ -152,11 +152,11 @@ export default class SettingsView extends JetView {
                 ]
             }
         ];
-
+        
         //SECTION 2: PASSWORD AND SECURITY
         const securityElements = [
-            { template: "PASSWORD & SECURITY", type: "section", align: "left" },
-            { view: "button", value: "Change Password", css: "webix_secondary", width: 200, align: "left", click: () => this.showPasswordWindow() }
+            { template: "PASSWORD & SECURITY", type: "header", align: "left" },
+            { view: "button", value: "Change Password", css: "webix_primary", width: 200, align: "left", click: () => this.showPasswordWindow() }
         ];
 
         //MAIN CONFIGURATION 
@@ -175,11 +175,9 @@ export default class SettingsView extends JetView {
                             ]},
                             { height: 20 },
                             ...profileElements,
-                            { height: 40 },
-                            { view: "template", template: " ", height: 1, css: "separator_line", borderless: true },
-                            { height: 40 },
+                            { height: 10 },     
                             ...securityElements,
-                            { height: 50 }
+                            { height: 20 }
                         ]
                     },
                     {} 
@@ -289,55 +287,79 @@ export default class SettingsView extends JetView {
     }
 
     showPasswordWindow() {
-        const win = webix.ui({
-            view: "window", modal: true, position: "center", head: "Change Password", width: 400,
+        if (this._passWindow) {
+            this._passWindow.show();
+            const form = this._passWindow.getBody();
+            form.clear();
+            form.clearValidation();
+            return;
+        }
+
+        this._passWindow = this.ui({
+            view: "window", 
+            modal: true, 
+            position: "center", 
+            head: "Change Password", 
+            width: 400,
             body: {
-                view: "form", localId: "passwordForm", padding: 20,
+                view: "form", 
+                padding: 20,
                 elementsConfig: { labelPosition: "top", bottomPadding: 15 },
                 elements: [
                     { view: "text", type: "password", label: "Old Password", name: "old_pass", placeholder: "Enter current password", required: true },
                     { 
                         view: "text", type: "password", label: "New Password", name: "new_pass", placeholder: "Enter new password", required: true,
+                        localId: "new_pass_input",
                         on: {
                             onKeyup: (code, event) => {
-                                const password = this.$$("new_pass_input").getValue();
-                                const strength = this.checkPasswordStrength(password);
-                                const meter = webix.$$("strength_meter_modal"); 
+                                const val = event.target.value;
+                                const strength = this.checkPasswordStrength(val);
+                                const meter = this._passWindow.getBody().queryView({ localId: "strength_meter_modal" });
                                 if (meter) meter.setHTML(`<div class="strength_bar ${strength.css}"></div><div class="strength_text ${strength.css}">${strength.text}</div>`);
                             }
-                        },
-                        localId: "new_pass_input"
+                        }
                     },
                     { view: "template", localId: "strength_meter_modal", height: 20, borderless: true, css: "strength_container" },
                     { view: "text", type: "password", label: "Confirm Password", name: "confirm_pass", placeholder: "Re-enter new password", required: true },
-                    { margin: 10, cols: [
-                        { view: "button", value: "Cancel", click: function(){ this.getTopParentView().close(); }},
-                        { 
-                            view: "button", value: "Save", css: "webix_primary", 
-                            click: function() {
-                                const form = this.getFormView();
-                                const rootViewScope = this.$scope.getParentView().$scope;
-                                const values = form.getValues();
-                                
-                                if (!form.validate()) { webix.message({ type: "error", text: "Please fill all required fields." }); return; }
-                                if (values.new_pass !== values.confirm_pass) { webix.message({ type: "error", text: "New passwords do not match!" }); return; }
-                                if (rootViewScope.checkPasswordStrength(values.new_pass).css === "weak") { webix.message({ type: "error", text: "Password is too weak." }); return; }
-                                const changePasswordPayload = { old_password: values.old_pass, new_password: values.new_pass };
-                                webix.ajax().put("http://127.0.0.1:8000/api/settings/change-password/", changePasswordPayload).then(response => {
-                                    webix.message({ type:"success", text: "Password Changed Successfully" });
-                                    this.getTopParentView().close();
-                                }).fail(error => {
-                                    let errorMsg = "Password change failed.";
-                                    if (error.json() && error.json().error) errorMsg = error.json().error;
-                                    webix.message({ type: "error", text: errorMsg });
-                                });
+                    
+                    { 
+                        margin: 20, 
+                        cols: [
+                            { 
+                                view: "button", value: "Cancel", 
+                                click: () => {
+                                    this._passWindow.hide();
+                                } 
+                            },
+                            { 
+                                view: "button", value: "Save", css: "webix_primary", 
+                                click: () => {
+                                    const form = this._passWindow.getBody();
+                                    const values = form.getValues();
+                                    
+                                    if (!form.validate()) { webix.message({ type: "error", text: "Please fill all required fields." }); return; }
+                                    if (values.new_pass !== values.confirm_pass) { webix.message({ type: "error", text: "New passwords do not match!" }); return; }
+                                    if (this.checkPasswordStrength(values.new_pass).css === "weak") { webix.message({ type: "error", text: "Password is too weak." }); return; }
+                                    
+                                    const changePasswordPayload = { old_password: values.old_pass, new_password: values.new_pass };
+                                    
+                                    webix.ajax().put("http://127.0.0.1:8000/api/settings/change-password/", changePasswordPayload).then(response => {
+                                        webix.message({ type:"success", text: "Password Changed Successfully" });
+                                        this._passWindow.hide(); 
+                                    }).fail(error => {
+                                        let errorMsg = "Password change failed.";
+                                        if (error.json() && error.json().error) errorMsg = error.json().error;
+                                        webix.message({ type: "error", text: errorMsg });
+                                    });
+                                }
                             }
-                        }
-                    ]}
+                        ]
+                    }
                 ]
             }
         });
-        win.show();
+
+        this._passWindow.show();
     }
 
     ready(){

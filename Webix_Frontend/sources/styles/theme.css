@@ -9,7 +9,7 @@
 .webix_el_box input, .webix_el_box select, .webix_inp_static, 
 .webix_template, .webix_list_item, .webix_button, 
 .webix_header, .webix_window,.webix_inp_label,.webix_el_box,
-.webix_segment_0, .webix_segment_1, .webix_segment_N {
+.webix_inp_top_label,.webix_segment_0, .webix_segment_1, .webix_segment_N {
     font-size: var(--app-font-size) !important;
 }
 

@@ -8,7 +8,7 @@
 .webix_view, .webix_el_label, .webix_label_right, 
 .webix_el_box input, .webix_el_box select, .webix_inp_static, 
 .webix_template, .webix_list_item, .webix_button, 
-.webix_header, .webix_window, 
+.webix_header, .webix_window,.webix_inp_label,.webix_el_box,
 .webix_segment_0, .webix_segment_1, .webix_segment_N {
     font-size: var(--app-font-size) !important;
 }
@@ -28,8 +28,8 @@ body.webix_dark .webix_header > div, body.webix_dark .webix_button, body.webix_d
 body.webix_dark .description_text { color: #bbbbbb !important; }
 body.webix_dark .value_label .webix_el_box { color: #ffffff !important; }
 
-body.webix_dark input, body.webix_dark select, body.webix_dark .webix_inp_static,
-body.webix_dark .webix_segment_0, body.webix_dark .webix_segment_1, body.webix_dark .webix_segment_N { 
+body.webix_dark input, body.webix_dark select, body.webix_dark .webix_inp_static,body.webix_dark .section_title_text,
+body.webix_dark .section_subtitle_text,body.webix_dark .webix_segment_0, body.webix_dark .webix_segment_1, body.webix_dark .webix_segment_N { 
     background-color: #3b3b3b !important; color: #fff !important; border-color: #555 !important; 
 }
 body.webix_dark .webix_popup, body.webix_dark .webix_list {

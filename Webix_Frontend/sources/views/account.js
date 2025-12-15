@@ -48,12 +48,35 @@ export default class SettingsView extends JetView {
         ];
 
         const profileElements = [
-            {
-                rows: [
-                    { view: "label", label: "Profile Information", css: "section_header", align: "left" },
-                    { view: "label", label: "Update your photo and personal details", css: "section_subtitle", align: "left" }
-                ]
-            },
+            // {
+            //     css: { 
+            //         "background-color": "rgba(127, 127, 127, 0.1)", // Adaptive background
+            //         "border-radius": "8px", 
+            //         "padding": "15px", 
+            //         "margin-bottom": "20px" 
+            //     }, 
+            //     rows: [
+            //         { 
+            //             template: "Privacy Settings", 
+            //             type: "clean", 
+            //             autoheight: true, 
+            //             css: { 
+            //                 "font-size": "24px", 
+            //                 "font-weight": "600"
+    
+            //             } 
+            //         },
+            //         { 
+            //             template: "Control your privacy and data sharing preferences", 
+            //             type: "clean", 
+            //             height: 25, 
+            //             css: { 
+            //                 "opacity": ".7", // Opacity -> adapts to Theme brightness
+            //                 "font-size": "14px" 
+            //             } 
+            //         }
+            //     ]
+            // },
             { height: 20 },
             {
                 cols: [

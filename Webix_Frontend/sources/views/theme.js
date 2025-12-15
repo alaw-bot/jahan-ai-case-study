@@ -94,7 +94,7 @@ export default class ThemeSettingsView extends JetView {
                             },
                             { height: 15 },
                             {
-                                view: "richselect",
+                                view: "label",
                                 label: "Font Style",
                                 labelPosition: "top",
                                 name: "font_family",

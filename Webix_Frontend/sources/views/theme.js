@@ -222,6 +222,7 @@ export default class ThemeSettingsView extends JetView {
     }
 
     updateAccentColor(color) {
+        document.documentElement.style.setProperty('--app-accent-color', color);
     }
 
     toggleHighContrast(enabled) {
@@ -239,7 +240,7 @@ export default class ThemeSettingsView extends JetView {
             theme_mode: "light",
             font_size: 14,
             font_family: "default",
-            accent_color: "#1CA1C1",
+            accent_color: "#1CA1C1", 
             high_contrast: 0
         };
 

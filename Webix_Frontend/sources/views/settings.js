@@ -1,7 +1,8 @@
 import { JetView, plugins } from "webix-jet";
-import "../styles/settings.css";
-import "webix/webix.css";      
+import "webix/webix.css";         
+import "../styles/settings.css";    
 export default class SettingsPage extends JetView {
+    
 
     config() {
         return {

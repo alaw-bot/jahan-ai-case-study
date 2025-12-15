@@ -62,13 +62,29 @@ export default class SettingsView extends JetView {
                     {
                         rows: [
                             {
-                                view: "uploader", value: "Upload New Photo", localId: "photo_uploader", autosend: false, accept: "image/*", width: 160, css: "webix_primary",
+                                view: "uploader", 
+                                value: "Upload New Photo", 
+                                localId: "photo_uploader", 
+                                upload: "http://127.0.0.1:8000/api/settings/avatar-upload/", 
+                                autosend: true, 
+                                name: "upload", 
+                                accept: "image/*", 
+                                width: 160, 
+                                css: "webix_primary",
+                                
                                 on: {
-                                    onBeforeFileAdd: (upload) => {
-                                        var reader = new FileReader();
-                                        reader.onload = (e) => this.$$("avatar_preview").setValues({ src: e.target.result });
-                                        reader.readAsDataURL(upload.file);
-                                        return false;
+                                    onFileUpload: (file, response) => {
+                                        if (response && response.url) {
+                                            let fullUrl = response.url;
+                                            if (!fullUrl.startsWith("http")) {
+                                                fullUrl = "http://127.0.0.1:8000" + fullUrl;
+                                            }
+                                            this.$$("avatar_preview").setValues({ src: fullUrl });
+                                            webix.message({type:"success", text: "Photo saved!"});
+                                        }
+                                    },
+                                    onUploadFail: (file, response) => {
+                                         webix.message({type:"error", text: "Upload failed."});
                                     }
                                 }
                             },
@@ -153,35 +169,39 @@ export default class SettingsView extends JetView {
         };
     }
 
-    //API Load Method 
-    loadProfileData() {
-        webix.ajax().get("http://127.0.0.1:8000/api/settings/profile/").then(response => {
-            const data = response.json();
-            
-            if (!data || !data.username) {
-                webix.message({type: "error", text: "Invalid or empty data received from the server."});
-                return;
-            }
+  //API Load Method 
+  loadProfileData() {
+    webix.ajax().get("http://127.0.0.1:8000/api/settings/profile/").then(response => {
+        const data = response.json();
+        
+        if (!data || !data.username) {
+            webix.message({type: "error", text: "Invalid or empty data received from the server."});
+            return;
+        }
 
-            this.$$("mainForm").setValues({
-                username: data.username,
-                email: data.email, 
-                display_name: data.display_name,
-                bio: data.bio,
-                country: data.country,
-                phone_code: data.phone_code,
-                phone_number: data.phone_number
-            });
-
-            if (data.avatar) {
-                 this.$$("avatar_preview").setValues({ src: data.avatar });
-            }
-            webix.message("Profile data loaded.");
-        }).fail(error => {
-            webix.message({type: "error", text: "Failed to connect to Django (Port 8000)."});
-            console.error("API Error:", error);
+        this.$$("mainForm").setValues({
+            username: data.username,
+            email: data.email, 
+            display_name: data.display_name,
+            bio: data.bio,
+            country: data.country,
+            phone_code: data.phone_code,
+            phone_number: data.phone_number
         });
-    }
+
+        if (data.avatar) {
+             let avatarUrl = data.avatar;
+             if (!avatarUrl.startsWith("http")) {
+                 avatarUrl = "http://127.0.0.1:8000" + avatarUrl;
+             }
+             this.$$("avatar_preview").setValues({ src: avatarUrl });
+        }
+        webix.message("Profile data loaded.");
+    }).fail(error => {
+        webix.message({type: "error", text: "Failed to connect to Django (Port 8000)."});
+        console.error("API Error:", error);
+    });
+}
 
     //API Save
     saveProfileChanges() {

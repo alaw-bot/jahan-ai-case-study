@@ -217,7 +217,8 @@ export default class ThemeSettingsView extends JetView {
         if (type === "serif") fontStack = "Georgia, serif";
         if (type === "mono")  fontStack = "'Courier New', monospace";
         if (type === "sans")  fontStack = "Arial, sans-serif";
-        document.body.style.fontFamily = fontStack;
+        
+        document.documentElement.style.setProperty('--app-font-family', fontStack);
     }
 
     updateAccentColor(color) {

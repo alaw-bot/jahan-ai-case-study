@@ -1,5 +1,6 @@
 :root {
     --app-font-size: 14px; 
+    --app-font-family: "Roboto",
 }
 
 .description_text { color: #666; font-size: 13px; line-height: 1.2; background: transparent; }
@@ -111,4 +112,20 @@ body.hc_mode .webix_list_item:hover,
 body.hc_mode .webix_list_item.webix_selected {
     background-color: #FFFF00 !important; 
     color: #000000 !important;
+}
+
+.webix_view, 
+.webix_el_label, 
+.webix_label_right, 
+.webix_inp_label,       
+.webix_inp_top_label,   
+.webix_inp_static, 
+.webix_template, 
+.webix_list_item, 
+.webix_button, 
+.webix_header, 
+.webix_window, 
+.webix_el_box {
+    font-size: var(--app-font-size) !important;
+    font-family: var(--app-font-family) !important;
 }

@@ -56,7 +56,7 @@ export default class MyApp extends JetApp {
                     if (saved.font_family === "serif") fontStack = "Georgia, serif";
                     if (saved.font_family === "mono")  fontStack = "'Courier New', monospace";
                     if (saved.font_family === "sans")  fontStack = "Arial, sans-serif";
-                    document.body.style.fontFamily = fontStack;
+                    document.documentElement.style.setProperty('--app-font-family', fontStack);
                 }
             }
         } catch (e) {

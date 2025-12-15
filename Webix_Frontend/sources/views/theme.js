@@ -224,7 +224,13 @@ export default class ThemeSettingsView extends JetView {
     }
 
     toggleHighContrast(enabled) {
-        document.body.style.filter = enabled ? "contrast(150%) brightness(90%)" : "none";
+        document.body.style.filter = "none";
+
+        if (enabled) {
+            webix.html.addCss(document.body, "hc_mode");
+        } else {
+            webix.html.removeCss(document.body, "hc_mode");
+        }
     }
 
     resetTheme() {

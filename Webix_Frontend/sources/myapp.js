@@ -27,31 +27,40 @@ export default class MyApp extends JetApp {
     }
 
     restoreGlobalTheme() {
-        const saved = JSON.parse(localStorage.getItem("app_settings"));
-        
-        if (saved) {
-            if (saved.theme_mode === "dark") {
-                webix.html.addCss(document.body, "webix_dark");
-            } else if (saved.theme_mode === "auto") {
-                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        try {
+            const saved = JSON.parse(localStorage.getItem("app_settings"));
+            
+            if (saved) {
+                document.body.style.filter = "none"; 
+                
+                if (saved.high_contrast) {
+                    webix.html.addCss(document.body, "hc_mode");
+                } else {
+                    webix.html.removeCss(document.body, "hc_mode");
+                }
+                if (saved.theme_mode === "dark") {
                     webix.html.addCss(document.body, "webix_dark");
+                } else if (saved.theme_mode === "auto") {
+                    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                        webix.html.addCss(document.body, "webix_dark");
+                    }
+                } else {
+                    webix.html.removeCss(document.body, "webix_dark");
+                }
+
+                if (saved.font_size) {
+                    document.documentElement.style.setProperty('--app-font-size', saved.font_size + "px");
+                }
+                if (saved.font_family) {
+                    let fontStack = "Roboto, sans-serif";
+                    if (saved.font_family === "serif") fontStack = "Georgia, serif";
+                    if (saved.font_family === "mono")  fontStack = "'Courier New', monospace";
+                    if (saved.font_family === "sans")  fontStack = "Arial, sans-serif";
+                    document.body.style.fontFamily = fontStack;
                 }
             }
-
-            if (saved.font_size) {
-                document.documentElement.style.setProperty('--app-font-size', saved.font_size + "px");
-            }
-
-            if (saved.high_contrast) {
-                document.body.style.filter = "contrast(150%) brightness(90%)";
-            }
-            if (saved.font_family) {
-                let fontStack = "Roboto, sans-serif";
-                if (saved.font_family === "serif") fontStack = "Georgia, serif";
-                if (saved.font_family === "mono")  fontStack = "'Courier New', monospace";
-                if (saved.font_family === "sans")  fontStack = "Arial, sans-serif";
-                document.body.style.fontFamily = fontStack;
-            }
+        } catch (e) {
+            console.error("Error restoring theme:", e);
         }
     }
 }
@@ -59,4 +68,3 @@ export default class MyApp extends JetApp {
 if (!import.meta.env.VITE_BUILD_AS_MODULE){
     webix.ready(() => new MyApp().render() );
 }
-

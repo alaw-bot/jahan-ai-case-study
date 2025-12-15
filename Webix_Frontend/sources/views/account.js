@@ -40,7 +40,13 @@ export default class SettingsView extends JetView {
             { id: "+49", value: "+49 (DE)" }
         ];
 
-        //SECTION 1: PROFILE INFORMATION
+        const genderOptions = [
+            { id: "Male", value: "Male" },
+            { id: "Female", value: "Female" },
+            { id: "Other", value: "Other" },
+            { id: "Prefer not to say", value: "Prefer not to say" }
+        ];
+
         const profileElements = [
             {
                 rows: [
@@ -71,7 +77,6 @@ export default class SettingsView extends JetView {
                                 accept: "image/*", 
                                 width: 160, 
                                 css: "webix_primary",
-                                
                                 on: {
                                     onFileUpload: (file, response) => {
                                         if (response && response.url) {
@@ -107,9 +112,23 @@ export default class SettingsView extends JetView {
             { template: "BASIC INFORMATION", type: "section", align: "left" },
             { view: "text", label: "Username", name: "username", localId: "username", placeholder: "e.g. jdoe123", labelWidth: 150, readonly: true },
             { view: "text", label: "Display Name", name: "display_name", localId: "display_name", placeholder: "e.g. John Doe", labelWidth: 150, readonly: true },
+            
+            { 
+                view: "datepicker", label: "Date of Birth", name: "dob", localId: "dob", 
+                placeholder: "Select Date", labelWidth: 150, disabled: true, 
+                stringResult: true, format: "%Y-%m-%d" 
+            },
+            
+            { 
+                view: "radio", label: "Gender", name: "gender", localId: "gender", 
+                labelWidth: 150, disabled: true, 
+                options: genderOptions,
+                customRadio: false
+            },
+
             { view: "textarea", label: "Bio", name: "bio", localId: "bio", height: 100, placeholder: "Tell us a little about yourself...", labelWidth: 150, readonly: true },
 
-            // 3. Contact Info
+            // 3. Contact Info 
             { template: "CONTACT INFORMATION", type: "section", align: "left" },
             { view: "text", label: "Email Address", name: "email", localId: "email", placeholder: "user@example.com", labelWidth: 150, readonly: true },
             { view: "combo", label: "Country", name: "country", localId: "country", placeholder: "Select country", labelWidth: 150, disabled: true, suggest: { body: { yCount: 5, autoWidth: false, data: countries } } },
@@ -169,39 +188,41 @@ export default class SettingsView extends JetView {
         };
     }
 
-  //API Load Method 
-  loadProfileData() {
-    webix.ajax().get("http://127.0.0.1:8000/api/settings/profile/").then(response => {
-        const data = response.json();
-        
-        if (!data || !data.username) {
-            webix.message({type: "error", text: "Invalid or empty data received from the server."});
-            return;
-        }
+    //API Load Method 
+    loadProfileData() {
+        webix.ajax().get("http://127.0.0.1:8000/api/settings/profile/").then(response => {
+            const data = response.json();
+            
+            if (!data || !data.username) {
+                webix.message({type: "error", text: "Invalid or empty data received from the server."});
+                return;
+            }
 
-        this.$$("mainForm").setValues({
-            username: data.username,
-            email: data.email, 
-            display_name: data.display_name,
-            bio: data.bio,
-            country: data.country,
-            phone_code: data.phone_code,
-            phone_number: data.phone_number
+            this.$$("mainForm").setValues({
+                username: data.username,
+                email: data.email, 
+                display_name: data.display_name,
+                dob: data.dob,       
+                gender: data.gender, 
+                bio: data.bio,
+                country: data.country,
+                phone_code: data.phone_code,
+                phone_number: data.phone_number
+            });
+
+            if (data.avatar) {
+                 let avatarUrl = data.avatar;
+                 if (!avatarUrl.startsWith("http")) {
+                     avatarUrl = "http://127.0.0.1:8000" + avatarUrl;
+                 }
+                 this.$$("avatar_preview").setValues({ src: avatarUrl });
+            }
+            webix.message("Profile data loaded.");
+        }).fail(error => {
+            webix.message({type: "error", text: "Failed to connect to Django (Port 8000)."});
+            console.error("API Error:", error);
         });
-
-        if (data.avatar) {
-             let avatarUrl = data.avatar;
-             if (!avatarUrl.startsWith("http")) {
-                 avatarUrl = "http://127.0.0.1:8000" + avatarUrl;
-             }
-             this.$$("avatar_preview").setValues({ src: avatarUrl });
-        }
-        webix.message("Profile data loaded.");
-    }).fail(error => {
-        webix.message({type: "error", text: "Failed to connect to Django (Port 8000)."});
-        console.error("API Error:", error);
-    });
-}
+    }
 
     //API Save
     saveProfileChanges() {
@@ -211,6 +232,8 @@ export default class SettingsView extends JetView {
         const payload = {
             user: { username: values.username },
             display_name: values.display_name,
+            dob: values.dob,
+            gender: values.gender,
             bio: values.bio,
             country: values.country,
             phone_code: values.phone_code,
@@ -228,7 +251,7 @@ export default class SettingsView extends JetView {
 
     toggleEditMode(enable) {
         const textFields = ["username", "display_name", "bio", "email", "phone_number"];
-        const comboFields = ["country", "phone_code"];
+        const comboFields = ["country", "phone_code", "dob", "gender"];
 
         textFields.forEach(id => {
             const field = this.$$(id);

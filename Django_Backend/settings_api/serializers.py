@@ -8,7 +8,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ('id', 'username', 'email', 'display_name', 'bio', 
-                  'phone_code', 'phone_number', 'country', 'avatar')
+                  'phone_code', 'phone_number', 'country', 'avatar', 'dob', 'gender')
         read_only_fields = ('email',)
 
     def update(self, instance, validated_data):
@@ -23,6 +23,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         instance.phone_code = validated_data.get('phone_code', instance.phone_code)
         instance.phone_number = validated_data.get('phone_number', instance.phone_number)
         instance.country = validated_data.get('country', instance.country)
+        instance.dob = validated_data.get('dob', instance.dob)
+        instance.gender = validated_data.get('gender', instance.gender)
         instance.save()
         return instance
 

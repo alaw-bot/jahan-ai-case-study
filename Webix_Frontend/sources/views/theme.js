@@ -42,7 +42,7 @@ export default class ThemeSettingsView extends JetView {
                                 ]
                             },
                             { height: 20 },
-                            { template: "APPEARANCE", type: "section" },
+                            { template: "APPEARANCE", type: "header" },
                             {
                                 paddingY: 10,
                                 rows: [
@@ -67,7 +67,7 @@ export default class ThemeSettingsView extends JetView {
                             },
 
                             { height: 10 },
-                            { template: "TYPOGRAPHY", type: "section" },
+                            { template: "TYPOGRAPHY", type: "header" },
                             {
                                 cols: [
                                     {
@@ -112,7 +112,7 @@ export default class ThemeSettingsView extends JetView {
                                 }
                             },
                             { height: 20 },
-                            { template: "ACCENT COLOR", type: "section" },
+                            { template: "ACCENT COLOR", type: "header" },
                             {
                                 cols: [
                                     {
@@ -136,7 +136,7 @@ export default class ThemeSettingsView extends JetView {
                                 ]
                             },
                             { height: 10 },
-                            { template: "ACCESSIBILITY", type: "section" },
+                            { template: "ACCESSIBILITY", type: "header" },
                             {
                                 cols: [
                                     {

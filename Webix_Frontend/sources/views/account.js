@@ -129,7 +129,23 @@ export default class SettingsView extends JetView {
             // 2. Basic Details
             { template: "BASIC INFORMATION", type: "header", align: "left", },
             { view: "text", label: "Username", name: "username", localId: "username", placeholder: "e.g. jdoe123", labelWidth: 150, readonly: true },
-            { view: "text", label: "Display Name", name: "display_name", localId: "display_name", placeholder: "e.g. John Doe", labelWidth: 150, readonly: true },
+        
+            { 
+                view: "text", 
+                label: "Display Name", 
+                name: "display_name", 
+                localId: "display_name", 
+                placeholder: "e.g. John Doe", 
+                labelWidth: 150, 
+                readonly: true,
+                validate: (value) => /^[a-zA-Z\s]*$/.test(value), 
+                invalidMessage: "Name must contain letters only",
+                on: {
+                    onTimedKeyPress: function() {
+                        this.validate(); 
+                    }
+                }
+            },
             
             { 
                 view: "datepicker", label: "Date of Birth", name: "dob", localId: "dob", 
@@ -148,13 +164,44 @@ export default class SettingsView extends JetView {
 
             // 3. Contact Info 
             { template: "CONTACT INFORMATION", type: "header", align: "left" },
-            { view: "text", label: "Email Address", name: "email", localId: "email", placeholder: "user@example.com", labelWidth: 150, readonly: true },
+            
+            { 
+                view: "text", 
+                label: "Email Address", 
+                name: "email", 
+                localId: "email", 
+                placeholder: "user@example.com", 
+                labelWidth: 150, 
+                readonly: true,
+                validate: webix.rules.isEmail,
+                invalidMessage: "Invalid email format",
+                on: {
+                    onTimedKeyPress: function() {
+                        this.validate();
+                    }
+                }
+            },
+            
             { view: "combo", label: "Country", name: "country", localId: "country", placeholder: "Select country", labelWidth: 150, disabled: true, suggest: { body: { yCount: 5, autoWidth: false, data: countries } } },
             {
                 cols: [
                     { view: "combo", label: "Phone Number", name: "phone_code", localId: "phone_code", placeholder: "Code", labelWidth: 150, width: 260, disabled: true, suggest: { body: { yCount: 5, autoWidth: false, data: countryCodes } } },
                     { width: 10 },
-                    { view: "text", name: "phone_number", localId: "phone_number", placeholder: "123 456 7890", fillspace: true, readonly: true }
+                    { 
+                        view: "text", 
+                        name: "phone_number", 
+                        localId: "phone_number", 
+                        placeholder: "1234567890", 
+                        fillspace: true, 
+                        readonly: true,
+                        validate: (value) => /^\d*$/.test(value),
+                        invalidMessage: "Numbers only",
+                        on: {
+                            onTimedKeyPress: function() {
+                                this.validate();
+                            }
+                        }
+                    }
                 ]
             },
             { height: 20 },
@@ -184,8 +231,13 @@ export default class SettingsView extends JetView {
                 cols: [
                     {}, 
                     {
-                        view: "form", localId: "mainForm", width: 900, borderless: true, padding: {top: 20, right: 30, bottom: 20, left: 30},
+                        view: "form", 
+                        localId: "mainForm", 
+                        width: 900, 
+                        borderless: true, 
+                        padding: {top: 20, right: 30, bottom: 20, left: 30},
                         elementsConfig: { labelWidth: 150, bottomPadding: 18 },
+                        
                         elements: [
                             { rows:[
                                 { template: "Account Settings", type: "header", borderless: true, css: "webix_header_l", align: "left" },
@@ -243,6 +295,12 @@ export default class SettingsView extends JetView {
     //API Save
     saveProfileChanges() {
         const form = this.$$("mainForm");
+        
+        if (!form.validate()) {
+            webix.message({ type: "error", text: "Please fix the validation errors." });
+            return;
+        }
+
         const values = form.getValues();
         
         const payload = {
@@ -280,10 +338,15 @@ export default class SettingsView extends JetView {
                     field.define("readonly", true);
                     field.getInputNode().style.cursor = "not-allowed"; 
                     field.getInputNode().style.backgroundColor = "#fafafa";
+                    field.validate(); 
                 }
                 field.refresh();
             }
         });
+
+        if(!enable) {
+            this.$$("mainForm").clearValidation();
+        }
 
         comboFields.forEach(id => {
             const field = this.$$(id);

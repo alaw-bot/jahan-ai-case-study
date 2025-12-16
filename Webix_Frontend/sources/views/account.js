@@ -57,16 +57,11 @@ export default class SettingsView extends JetView {
         ];
 
         const profileElements = [
+            { height: 20 },
             {
                 cols: [
                     {
-                        view: "template", 
-                        localId: "avatar_preview", 
-                        borderless: true, 
-                        width: 100, 
-                        height: 100, 
-                        css: "avatar_circle",
-                        padding: 0, 
+                        view: "template", localId: "avatar_preview", borderless: true, width: 100, height: 100, css: "avatar_circle",
                         template: (obj) => {
                             if(obj.src) return `<img src="${obj.src}" class="avatar_img">`;
                             return `<div class="avatar_placeholder">U</div>`;
@@ -383,6 +378,43 @@ export default class SettingsView extends JetView {
     }
 
     showPasswordWindow() {
+        // Helper function for password visibility 
+        const togglePasswordVisibility = function(isNewPass = false) {
+            const currentValue = this.getValue();
+            const input = this.getInputNode();
+            
+            if (!input) return false;
+
+            if (input.type === "password") {
+                input.type = "text";
+                this.config.type = "text";
+                const iconEl = this.$view.querySelector(".webix_input_icon");
+                if (iconEl) {
+                    iconEl.innerHTML = '<span class="mdi mdi-eye-off"></span>';
+                }
+                this.define({ type: "text", icon: "mdi mdi-eye-off" });
+            } else {
+                input.type = "password";
+                this.config.type = "password";
+                const iconEl = this.$view.querySelector(".webix_input_icon");
+                if (iconEl) {
+                    iconEl.innerHTML = '<span class="mdi mdi-eye"></span>';
+                }
+                this.define({ type: "password", icon: "mdi mdi-eye" });
+            }
+
+            if (currentValue !== null && currentValue !== undefined) {
+                this.setValue(currentValue);
+            }
+            
+            this.refresh();
+            
+            if (isNewPass) {
+                this.callEvent("onTimedKeyPress");
+            }
+            return false;
+        };
+
         if (this._passWindow) {
             this._passWindow.show();
             const form = this._passWindow.getBody();
@@ -391,6 +423,16 @@ export default class SettingsView extends JetView {
 
             const meter = this._passWindow.getBody().queryView({ localId: "password_feedback" });
             if(meter) meter.setHTML(""); 
+            
+            const passwordFields = ["old_pass_input", "new_pass_input", "confirm_pass_input"];
+            passwordFields.forEach(localId => {
+                const field = form.queryView({ localId: localId });
+                if (field) {
+                    field.define({ type: "password", icon: "mdi mdi-eye" });
+                    field.refresh();
+                }
+            });
+            
             return;
         }
 
@@ -405,12 +447,69 @@ export default class SettingsView extends JetView {
                 padding: 20,
                 elementsConfig: { labelPosition: "top", bottomPadding: 15 },
                 elements: [
-                    { view: "text", type: "password", label: "Old Password", name: "old_pass", placeholder: "Enter current password", required: true },
+                    { 
+                        view: "text", 
+                        type: "password", 
+                        label: "Old Password", 
+                        name: "old_pass", 
+                        localId: "old_pass_input",
+                        placeholder: "Enter current password", 
+                        required: true,
+                        icon: "mdi mdi-eye",
+                        iconWidth: 40,
+                        on: {
+                            onIconClick: togglePasswordVisibility,
+                            onAfterRender: function() {                         
+                                const iconEl = this.$view.querySelector(".webix_input_icon");
+                                const inputBox = this.$view.querySelector(".webix_el_box");
+                                if (iconEl && inputBox) {                              
+                                    iconEl.style.position = "absolute";
+                                    iconEl.style.right = "15px";
+                                    iconEl.style.top = "50%";
+                                    iconEl.style.transform = "translateY(-50%)";
+                                    iconEl.style.cursor = "pointer";
+                                    iconEl.style.zIndex = "10";
+                                    iconEl.onclick = (e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        togglePasswordVisibility.call(this, false);
+                                    };
+                                }
+                            }
+                        }
+                    },
                     
                     { 
-                        view: "text", type: "password", label: "New Password", name: "new_pass", placeholder: "Enter new password", required: true,
+                        view: "text", 
+                        type: "password", 
+                        label: "New Password", 
+                        name: "new_pass", 
+                        placeholder: "Enter new password", 
+                        required: true,
                         localId: "new_pass_input",
+                        icon: "mdi mdi-eye",
+                        iconWidth: 40,
                         on: {
+                            onIconClick: function() {
+                                togglePasswordVisibility.call(this, true);
+                            },
+                            onAfterRender: function() {
+                                const iconEl = this.$view.querySelector(".webix_input_icon");
+                                const inputBox = this.$view.querySelector(".webix_el_box");
+                                if (iconEl && inputBox) {
+                                    iconEl.style.position = "absolute";
+                                    iconEl.style.right = "15px";
+                                    iconEl.style.top = "50%";
+                                    iconEl.style.transform = "translateY(-50%)";
+                                    iconEl.style.cursor = "pointer";
+                                    iconEl.style.zIndex = "10";
+                                    iconEl.onclick = (e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        togglePasswordVisibility.call(this, true);
+                                    };
+                                }
+                            },
                             onTimedKeyPress: () => {
                                 const form = this._passWindow.getBody();
                                 const val = form.queryView({ localId: "new_pass_input" }).getValue();
@@ -432,7 +531,37 @@ export default class SettingsView extends JetView {
 
                     { view: "template", localId: "password_feedback", height: 60, borderless: true, css: "strength_container", template: "" },
 
-                    { view: "text", type: "password", label: "Confirm Password", name: "confirm_pass", placeholder: "Re-enter new password", required: true },
+                    { 
+                        view: "text", 
+                        type: "password", 
+                        label: "Confirm Password", 
+                        name: "confirm_pass", 
+                        localId: "confirm_pass_input",
+                        placeholder: "Re-enter new password", 
+                        required: true,
+                        icon: "mdi mdi-eye",
+                        iconWidth: 40,
+                        on: {
+                            onIconClick: togglePasswordVisibility,
+                            onAfterRender: function() {
+                                const iconEl = this.$view.querySelector(".webix_input_icon");
+                                const inputBox = this.$view.querySelector(".webix_el_box");
+                                if (iconEl && inputBox) {
+                                    iconEl.style.position = "absolute";
+                                    iconEl.style.right = "15px";
+                                    iconEl.style.top = "50%";
+                                    iconEl.style.transform = "translateY(-50%)";
+                                    iconEl.style.cursor = "pointer";
+                                    iconEl.style.zIndex = "10";
+                                    iconEl.onclick = (e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        togglePasswordVisibility.call(this, false);
+                                    };
+                                }
+                            }
+                        }
+                    },
                     
                     { 
                         margin: 20, 

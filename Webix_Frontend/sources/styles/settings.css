@@ -1,4 +1,4 @@
-   .sidebar-custom .webix_sidebar {
+.sidebar-custom .webix_sidebar {
     background-color: #ffffff;
 }
 
@@ -13,7 +13,11 @@
 .sidebar-custom .webix_sidebar .webix_icon {
     color: #555 !important;  
     font-size: 18px;
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
+
 
 .sidebar-custom .webix_sidebar .webix_list_item:hover {
     background-color: rgba(0, 120, 215, 0.12);

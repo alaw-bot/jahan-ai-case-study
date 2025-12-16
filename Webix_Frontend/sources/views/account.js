@@ -73,7 +73,7 @@ export default class SettingsView extends JetView {
                             return `<div class="avatar_placeholder">U</div>`;
                         }
                     },
-                    { width: 20 },
+                    { width: 60 },
                     {
                         rows: [
                             {
@@ -117,10 +117,21 @@ export default class SettingsView extends JetView {
                             },
                             { height: 5 },
                             {
-                                view: "button", value: "Remove Photo", width: 160, css: "webix_transparent remove_btn",
+                                view: "button", 
+                                value: "Remove Photo", 
+                                width: 160, 
+                                css: "webix_danger delete_button_force",
                                 click: () => {
-                                    this.$$("avatar_preview").setValues({ src: "" });
-                                    webix.message("Photo removed");
+                                    webix.confirm({
+                                        title: "Remove Photo",
+                                        text: "Are you sure you want to remove your profile photo?",
+                                        ok: "Remove",
+                                        cancel: "Cancel",
+                                        type: "confirm-error"
+                                    }).then(() => {
+                                        this.$$("avatar_preview").setValues({ src: "" });
+                                        webix.message("Photo removed");
+                                    });
                                 }
                             }
                         ]

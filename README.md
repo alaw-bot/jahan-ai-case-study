@@ -60,32 +60,13 @@ This system provides user account management including authentication, profile c
 ## Project Structure Overview
 ## Project Structure Overview
 
-project-root/
-├── Django_Backend/
-│   ├── user_preferences/      # Django project (settings, URLs, WSGI)
-│   ├── settings_api/          # REST API app (auth, profile, password, avatar)
-│   ├── models.py              # UserProfile model
-│   ├── serializers.py         # Profile, register, change password serializers
-│   ├── urls.py                # API routes under /api/settings/
-│   ├── migrations/            # Database migrations
-│   ├── media/                 # Uploaded media files (avatars)
-│   ├── avatars/               # Stored avatar images
-│   ├── manage.py              # Django management script
-│   ├── Pipfile                # Dependency management
-│   └── Pipfile.lock           # Dependency lock file
-├── Webix_Frontend/
-│   ├── index.html             # App entry HTML
-│   ├── sources/
-│   │   ├── myapp.js           # Main Webix Jet app (routing, auth guard, theme restore)
-│   │   ├── locales/           # i18n files
-│   │   ├── models/            # Example data models
-│   │   ├── views/             # UI views (login, settings, account, theme, privacy)
-│   │   ├── services/          # Notification, privacy, theme helpers (frontend)
-│   │   └── styles/            # CSS files
-│   ├── package.json           # Frontend dependencies
-│   └── package-lock.json      # Dependency lock file
-├
-└── README.md                 # Frontend-specific instructions
+## Project Structure Overview
+
+
+<img width="711" height="582" alt="image" src="https://github.com/user-attachments/assets/0e777c21-5907-4a19-890e-13812f7f7120" />
+
+
+
 
 
 ## Backend Setup

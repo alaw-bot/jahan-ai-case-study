@@ -2,18 +2,23 @@ import {JetView} from "webix-jet";
 
 export default class ThemeSettingsView extends JetView {
     init() {
-        const saved = JSON.parse(localStorage.getItem("app_settings"));
+        let settings = JSON.parse(localStorage.getItem("app_settings"));
         
-        if (saved) {
-            this.$$("themeForm").setValues(saved);
-            this.toggleDarkMode(saved.theme_mode);
-            this.updateFontSize(saved.font_size);
-            this.updateFontFamily(saved.font_family);
-            this.updateAccentColor(saved.accent_color);
-            this.toggleHighContrast(saved.high_contrast);
-        } else {
-            this.toggleDarkMode("light");
+        if (!settings) {
+            settings = {
+                theme_mode: "light",
+                font_size: 14,
+                font_family: "default",
+                accent_color: "#1CA1C1",
+                high_contrast: 0
+            };
         }
+        this.$$("themeForm").setValues(settings);
+        this.toggleDarkMode(settings.theme_mode);
+        this.updateFontSize(settings.font_size);
+        this.updateFontFamily(settings.font_family);
+        this.updateAccentColor(settings.accent_color);
+        this.toggleHighContrast(settings.high_contrast);
     }
 
     config() {

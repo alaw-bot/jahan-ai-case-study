@@ -3,7 +3,7 @@ import * as webix from "webix";
 import "../styles/account.css";
 
 export default class SettingsView extends JetView {
-    
+
     checkPasswordStrength(password) {
         let strength = 0;
         if (password.length >= 8) strength++;
@@ -18,65 +18,51 @@ export default class SettingsView extends JetView {
         return { text: "", css: "" };
     }
 
+    getRequirementsHTML(password) {
+        const checks = [
+            { label: "8+ Chars", valid: password.length >= 8 },
+            { label: "Upper & Lower", valid: /[a-z]/.test(password) && /[A-Z]/.test(password) },
+            { label: "Number", valid: /\d/.test(password) },
+            { label: "Symbol", valid: /[!@#$%^&*(),.?":{}|<>]/.test(password) }
+        ];
+
+        let html = `<div class="pass_reqs">`;
+        checks.forEach(c => {
+            const icon = c.valid ? "✔" : "○";
+            const css = c.valid ? "req_item done" : "req_item missing";
+            html += `<span class="${css}">${icon} ${c.label}</span>`;
+        });
+        html += `</div>`;
+        return html;
+    }
+
     config() {
         const countries = [
-            { id: "LK", value: "Sri Lanka" },
-            { id: "AU", value: "Australia" },
-            { id: "US", value: "United States" },
-            { id: "IN", value: "India" },
-            { id: "UK", value: "United Kingdom" },
-            { id: "CA", value: "Canada" },
-            { id: "JP", value: "Japan" },
-            { id: "DE", value: "Germany" }
+            { id: "LK", value: "Sri Lanka" }, { id: "AU", value: "Australia" },
+            { id: "US", value: "United States" }, { id: "IN", value: "India" },
+            { id: "UK", value: "United Kingdom" }, { id: "CA", value: "Canada" },
+            { id: "JP", value: "Japan" }, { id: "DE", value: "Germany" }
         ];
 
         const countryCodes = [
-            { id: "+94", value: "+94 (LK)" },
-            { id: "+61", value: "+61 (AU)" },
-            { id: "+1",  value: "+1 (US/CA)" },
-            { id: "+91", value: "+91 (IN)" },
-            { id: "+44", value: "+44 (UK)" },
-            { id: "+81", value: "+81 (JP)" },
+            { id: "+94", value: "+94 (LK)" }, { id: "+61", value: "+61 (AU)" },
+            { id: "+1",  value: "+1 (US/CA)" }, { id: "+91", value: "+91 (IN)" },
+            { id: "+44", value: "+44 (UK)" }, { id: "+81", value: "+81 (JP)" },
             { id: "+49", value: "+49 (DE)" }
         ];
 
         const genderOptions = [
-            { id: "Male", value: "Male" },
-            { id: "Female", value: "Female" },
-            { id: "Other", value: "Other" },
-            { id: "Prefer not to say", value: "Prefer not to say" }
+            { id: "Male", value: "Male" }, { id: "Female", value: "Female" },
+            { id: "Other", value: "Other" }, { id: "Prefer not to say", value: "Prefer not to say" }
         ];
 
         const profileElements = [
-            // {
-            //     css: { 
-            //         "background-color": "rgba(127, 127, 127, 0.1)", // Adaptive background
-            //         "border-radius": "8px", 
-            //         "padding": "15px", 
-            //         "margin-bottom": "20px" 
-            //     }, 
-            //     rows: [
-            //         { 
-            //             template: "Privacy Settings", 
-            //             type: "clean", 
-            //             autoheight: true, 
-            //             css: { 
-            //                 "font-size": "24px", 
-            //                 "font-weight": "600"
-    
-            //             } 
-            //         },
-            //         { 
-            //             template: "Control your privacy and data sharing preferences", 
-            //             type: "clean", 
-            //             height: 25, 
-            //             css: { 
-            //                 "opacity": ".7", // Opacity -> adapts to Theme brightness
-            //                 "font-size": "14px" 
-            //             } 
-            //         }
-            //     ]
-            // },
+            {
+                rows: [
+                    { view: "label", label: "Profile Information", css: "section_header", align: "left" },
+                    { view: "label", label: "Update your photo and personal details", css: "section_subtitle", align: "left" }
+                ]
+            },
             { height: 20 },
             {
                 cols: [
@@ -94,8 +80,7 @@ export default class SettingsView extends JetView {
                                 view: "uploader", 
                                 value: "Upload New Photo", 
                                 localId: "photo_uploader", 
-                                
-                                autosend: false,                
+                                autosend: false, 
                                 name: "upload", 
                                 accept: "image/*", 
                                 width: 160, 
@@ -103,7 +88,7 @@ export default class SettingsView extends JetView {
                                 on: {
                                     onAfterFileAdd: function(item){
                                         const file = item.file;
-                                        const token = webix.storage.local.get("token");
+                                        const token = webix.storage.local.get("token"); 
 
                                         const formData = new FormData();
                                         formData.append("upload", file);
@@ -113,22 +98,19 @@ export default class SettingsView extends JetView {
                                             .post("http://127.0.0.1:8000/api/settings/avatar-upload/", formData)
                                             .then((res) => {
                                                 const response = res.json();
-
                                                 if (response && response.url) {
                                                     let fullUrl = response.url;
                                                     if (!fullUrl.startsWith("http")) {
                                                         fullUrl = "http://127.0.0.1:8000" + fullUrl;
                                                     }
-                                                    
                                                     this.$scope.$$("avatar_preview").setValues({ src: fullUrl });
                                                     webix.message({type:"success", text: "Photo saved!"});
                                                 }
                                             })
                                             .fail((err) => {
-                                                webix.message({type:"error", text: "Upload failed."});
                                                 console.error("Upload Error:", err);
+                                                webix.message({type:"error", text: "Upload failed. Please login again."});
                                             });
-                                            
                                         return false; 
                                     }
                                 }
@@ -143,19 +125,45 @@ export default class SettingsView extends JetView {
                             }
                         ]
                     },
-                    {} 
+                    {}
                 ]
             },
             { height: 20 },
 
             // 2. Basic Details
             { template: "BASIC INFORMATION", type: "header", align: "left", },
-            { view: "text", label: "Username", name: "username", localId: "username", placeholder: "e.g. jdoe123", labelWidth: 150, readonly: true },
-            { view: "text", label: "Display Name", name: "display_name", localId: "display_name", placeholder: "e.g. John Doe", labelWidth: 150, readonly: true },
+            
+            { 
+                view: "text", 
+                label: "Username", 
+                name: "username", 
+                localId: "username", 
+                placeholder: "e.g. jdoe123", 
+                labelWidth: 150, 
+                fillspace: true,
+                readonly: true, 
+                inputAlign: "left",
+                css: "readonly_field" 
+            },
+        
+            { 
+                view: "text", 
+                label: "Display Name", 
+                name: "display_name", 
+                localId: "display_name", 
+                placeholder: "e.g. John Doe", 
+                labelWidth: 150, 
+                fillspace: true, 
+                readonly: true,
+                validate: (value) => /^[a-zA-Z\s]*$/.test(value), 
+                invalidMessage: "Name must contain letters only",
+                on: { onTimedKeyPress: function() { this.validate(); } }
+            },
             
             { 
                 view: "datepicker", label: "Date of Birth", name: "dob", localId: "dob", 
                 placeholder: "Select Date", labelWidth: 150, disabled: true, 
+                fillspace: true, 
                 stringResult: true, format: "%Y-%m-%d" 
             },
             
@@ -166,17 +174,44 @@ export default class SettingsView extends JetView {
                 customRadio: false
             },
 
-            { view: "textarea", label: "Bio", name: "bio", localId: "bio", height: 100, placeholder: "Tell us a little about yourself...", labelWidth: 150, readonly: true },
+            { 
+                view: "textarea", label: "Bio", name: "bio", localId: "bio", 
+                height: 100, placeholder: "Tell us a little about yourself...", 
+                labelWidth: 150, readonly: true,
+                fillspace: true 
+            },
 
             // 3. Contact Info 
             { template: "CONTACT INFORMATION", type: "header", align: "left" },
-            { view: "text", label: "Email Address", name: "email", localId: "email", placeholder: "user@example.com", labelWidth: 150, readonly: true },
-            { view: "combo", label: "Country", name: "country", localId: "country", placeholder: "Select country", labelWidth: 150, disabled: true, suggest: { body: { yCount: 5, autoWidth: false, data: countries } } },
+            
+            { 
+                view: "text", label: "Email Address", name: "email", localId: "email", 
+                placeholder: "user@example.com", labelWidth: 150, readonly: true,
+                fillspace: true, 
+                validate: webix.rules.isEmail, invalidMessage: "Invalid email format",
+                on: { onTimedKeyPress: function() { this.validate(); } }
+            },
+            
+            { 
+                view: "combo", label: "Country", name: "country", localId: "country", 
+                placeholder: "Select country", labelWidth: 150, disabled: true, 
+                fillspace: true, 
+                suggest: { body: { yCount: 5, autoWidth: true, data: countries } } 
+            },
             {
                 cols: [
-                    { view: "combo", label: "Phone Number", name: "phone_code", localId: "phone_code", placeholder: "Code", labelWidth: 150, width: 260, disabled: true, suggest: { body: { yCount: 5, autoWidth: false, data: countryCodes } } },
+                    { 
+                        view: "combo", label: "Phone Number", name: "phone_code", localId: "phone_code", 
+                        placeholder: "Code", labelWidth: 150, width: 260, disabled: true, 
+                        suggest: { body: { yCount: 5, autoWidth: false, data: countryCodes } } 
+                    },
                     { width: 10 },
-                    { view: "text", name: "phone_number", localId: "phone_number", placeholder: "123 456 7890", fillspace: true, readonly: true }
+                    { 
+                        view: "text", name: "phone_number", localId: "phone_number", 
+                        placeholder: "1234567890", fillspace: true, readonly: true,
+                        validate: (value) => /^\d*$/.test(value), invalidMessage: "Numbers only",
+                        on: { onTimedKeyPress: function() { this.validate(); } }
+                    }
                 ]
             },
             { height: 20 },
@@ -184,49 +219,50 @@ export default class SettingsView extends JetView {
             // ACTION BUTTONS
             { 
                 cols: [
-                    {}, 
                     { view: "button", localId: "btn_edit", value: "Edit Profile", css: "webix_primary", width: 150, click: () => this.toggleEditMode(true) },
                     { view: "button", localId: "btn_cancel", value: "Cancel", width: 100, hidden: true, click: () => this.toggleEditMode(false) },
                     { width: 10 },
-                    { view: "button", localId: "btn_save", value: "Save Changes", css: "webix_primary", width: 150, hidden: true, click: () => this.saveProfileChanges() }
+                    { view: "button", localId: "btn_save", value: "Save Changes", css: "webix_primary", width: 150, hidden: true, click: () => this.saveProfileChanges() },
+                    {} 
                 ]
             }
         ];
         
-        //SECTION 2: PASSWORD AND SECURITY
         const securityElements = [
             { template: "PASSWORD & SECURITY", type: "header", align: "left" },
-            { view: "button", value: "Change Password", css: "webix_primary", width: 200, align: "left", click: () => this.showPasswordWindow() }
+            { 
+                cols: [
+                    { view: "button", value: "Change Password", css: "webix_primary", width: 200, align: "left", click: () => this.showPasswordWindow() },
+                    {} 
+                ]
+            }
         ];
 
-        //MAIN CONFIGURATION 
+        // MAIN CONFIGURATION 
         return {
             view: "scrollview", scroll: "y",
             body: {
-                cols: [
-                    {}, 
-                    {
-                        view: "form", localId: "mainForm", width: 900, borderless: true, padding: {top: 20, right: 30, bottom: 20, left: 30},
-                        elementsConfig: { labelWidth: 150, bottomPadding: 18 },
-                        elements: [
-                            { rows:[
-                                { template: "Account Settings", type: "header", borderless: true, css: "webix_header_l", align: "left" },
-                                { template: "Manage your profile, contact info, and security credentials", height: 35, borderless: true, css: "webix_el_label", style: "color: #888;", align: "left" }
-                            ]},
-                            { height: 20 },
-                            ...profileElements,
-                            { height: 10 },     
-                            ...securityElements,
-                            { height: 20 }
-                        ]
-                    },
-                    {} 
+                view: "form", 
+                localId: "mainForm", 
+                borderless: true, 
+                padding: {top: 20, right: 30, bottom: 20, left: 30},
+                elementsConfig: { labelWidth: 150, bottomPadding: 18 },
+                
+                elements: [
+                    { rows:[
+                        { template: "Account Settings", type: "header", borderless: true, css: "webix_header_l", align: "left" },
+                        { template: "Manage your profile, contact info, and security credentials", height: 35, borderless: true, css: "webix_el_label", style: "color: #888;", align: "left" }
+                    ]},
+                    { height: 20 },
+                    ...profileElements,
+                    { height: 10 },
+                    ...securityElements,
+                    { height: 20 }
                 ]
             }
         };
     }
 
-    //API Load Method 
     loadProfileData() {
         webix.ajax().get("http://127.0.0.1:8000/api/settings/profile/").then(response => {
             const data = response.json();
@@ -262,9 +298,14 @@ export default class SettingsView extends JetView {
         });
     }
 
-    //API Save
     saveProfileChanges() {
         const form = this.$$("mainForm");
+        
+        if (!form.validate()) {
+            webix.message({ type: "error", text: "Please fix the validation errors." });
+            return;
+        }
+
         const values = form.getValues();
         
         const payload = {
@@ -288,7 +329,7 @@ export default class SettingsView extends JetView {
     }
 
     toggleEditMode(enable) {
-        const textFields = ["username", "display_name", "bio", "email", "phone_number"];
+        const textFields = ["display_name", "bio", "email", "phone_number"];
         const comboFields = ["country", "phone_code", "dob", "gender"];
 
         textFields.forEach(id => {
@@ -302,10 +343,15 @@ export default class SettingsView extends JetView {
                     field.define("readonly", true);
                     field.getInputNode().style.cursor = "not-allowed"; 
                     field.getInputNode().style.backgroundColor = "#fafafa";
+                    field.validate(); 
                 }
                 field.refresh();
             }
         });
+
+        if(!enable) {
+            this.$$("mainForm").clearValidation();
+        }
 
         comboFields.forEach(id => {
             const field = this.$$(id);
@@ -332,6 +378,9 @@ export default class SettingsView extends JetView {
             const form = this._passWindow.getBody();
             form.clear();
             form.clearValidation();
+
+            const meter = this._passWindow.getBody().queryView({ localId: "password_feedback" });
+            if(meter) meter.setHTML(""); 
             return;
         }
 
@@ -347,19 +396,32 @@ export default class SettingsView extends JetView {
                 elementsConfig: { labelPosition: "top", bottomPadding: 15 },
                 elements: [
                     { view: "text", type: "password", label: "Old Password", name: "old_pass", placeholder: "Enter current password", required: true },
+                    
                     { 
                         view: "text", type: "password", label: "New Password", name: "new_pass", placeholder: "Enter new password", required: true,
                         localId: "new_pass_input",
                         on: {
-                            onKeyup: (code, event) => {
-                                const val = event.target.value;
+                            onTimedKeyPress: () => {
+                                const form = this._passWindow.getBody();
+                                const val = form.queryView({ localId: "new_pass_input" }).getValue();
+                                
                                 const strength = this.checkPasswordStrength(val);
-                                const meter = this._passWindow.getBody().queryView({ localId: "strength_meter_modal" });
-                                if (meter) meter.setHTML(`<div class="strength_bar ${strength.css}"></div><div class="strength_text ${strength.css}">${strength.text}</div>`);
+                                const reqsHTML = this.getRequirementsHTML(val);
+
+                                const html = `
+                                    <div class="strength_text ${strength.css}">${strength.text}</div>
+                                    <div class="strength_bar ${strength.css}"></div>
+                                    ${reqsHTML}
+                                `;
+
+                                const feedbackView = form.queryView({ localId: "password_feedback" });
+                                if (feedbackView) feedbackView.setHTML(html);
                             }
                         }
                     },
-                    { view: "template", localId: "strength_meter_modal", height: 20, borderless: true, css: "strength_container" },
+
+                    { view: "template", localId: "password_feedback", height: 60, borderless: true, css: "strength_container", template: "" },
+
                     { view: "text", type: "password", label: "Confirm Password", name: "confirm_pass", placeholder: "Re-enter new password", required: true },
                     
                     { 

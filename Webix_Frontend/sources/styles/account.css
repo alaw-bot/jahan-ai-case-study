@@ -215,3 +215,41 @@ body.webix_dark .webix_list_item.webix_selected {
 .webix_form {
     background-color: transparent;
 }
+.strength_container {
+    padding: 5px 0;
+    background: transparent;
+}
+
+.strength_bar {
+    height: 4px;
+    width: 0%;
+    transition: width 0.3s ease-in-out, background-color 0.3s;
+    border-radius: 2px;
+    margin-bottom: 5px;
+    background-color: #eee; 
+}
+
+.strength_bar.weak { width: 33%; background-color: #ff4d4d; }
+.strength_bar.medium { width: 66%; background-color: #ffc107; }
+.strength_bar.strong { width: 100%; background-color: #28a745; }
+
+.strength_text {
+    font-size: 12px;
+    font-weight: bold;
+    text-align: right;
+    margin-bottom: 5px;
+}
+.strength_text.weak { color: #ff4d4d; }
+.strength_text.medium { color: #ffc107; }
+.strength_text.strong { color: #28a745; }
+
+.pass_reqs {
+    font-size: 11px;
+    color: #888;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.req_item { display: inline-block; transition: color 0.3s; }
+.req_item.done { color: #28a745; font-weight: bold; }
+.req_item.missing { color: #ccc; }

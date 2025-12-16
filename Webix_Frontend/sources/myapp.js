@@ -23,12 +23,10 @@ export default class MyApp extends JetApp {
 
         this.attachEvent("app:guard", function(url, point, nav){
             const token = webix.storage.local.get("token");
-            console.log("GUARD CHECK:");
-            console.log(" -> Target URL:", url);
-            console.log(" -> Token found?", !!token);
+            // console.log("GUARD CHECK: -> Target URL:", url);
        
             if (url !== "/login" && !token) {
-                console.log(" -> BLOCKING: Redirecting to login");
+                // console.log(" -> BLOCKING: Redirecting to login");
                 nav.redirect = "/login"; 
             }
        });
@@ -41,10 +39,35 @@ export default class MyApp extends JetApp {
 
     restoreGlobalTheme() {
         try {
-            const saved = JSON.parse(localStorage.getItem("app_settings"));
+            let userId = "guest";
+            try {
+                const storedId = webix.storage.local.get("current_user_id");
+                if (storedId) userId = storedId;
+            } catch(e) { console.error(e); }
+
+            const key = `app_settings_${userId}`;
+            
+            console.log("🎨 Restoring Theme...");
+            console.log("   -> User ID:", userId);
+            console.log("   -> LocalStorage Key:", key);
+            
+            let saved = JSON.parse(localStorage.getItem(key));
+            console.log("   -> Found Settings?", !!saved);
+
+            if (!saved) {
+                saved = {
+                    accent_color: "#1CA1C1",
+                    font_size: 14,
+                    font_family: "default",
+                    theme_mode: "light",
+                    high_contrast: 0
+                };
+            }
+
             if (saved) {
                 if (saved.accent_color) document.documentElement.style.setProperty('--app-accent-color', saved.accent_color);
                 if (saved.font_size) document.documentElement.style.setProperty('--app-font-size', saved.font_size + "px");
+
                 if (saved.font_family) {
                     let fontStack = "Roboto, sans-serif";
                     if (saved.font_family === "serif") fontStack = "Georgia, serif";
@@ -52,6 +75,8 @@ export default class MyApp extends JetApp {
                     if (saved.font_family === "sans")  fontStack = "Arial, sans-serif";
                     document.documentElement.style.setProperty('--app-font-family', fontStack);
                 }
+                
+                webix.html.removeCss(document.body, "webix_dark");
                 if (saved.theme_mode === "dark") {
                     webix.html.addCss(document.body, "webix_dark");
                 } else if (saved.theme_mode === "auto") {
@@ -59,8 +84,12 @@ export default class MyApp extends JetApp {
                         webix.html.addCss(document.body, "webix_dark");
                     }
                 }
+
+                document.body.style.filter = "none";
                 if (saved.high_contrast) {
                     webix.html.addCss(document.body, "hc_mode");
+                } else {
+                    webix.html.removeCss(document.body, "hc_mode");
                 }
             }
         } catch (e) {

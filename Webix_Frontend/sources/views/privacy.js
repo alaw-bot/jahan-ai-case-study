@@ -5,12 +5,16 @@ import { PrivacyService } from "../services/privacy";
 export default class PrivacySettingsView extends JetView {
     STORAGE_KEY = "user_privacy_settings";
 
+    getStorageKey() {
+        const userId = webix.storage.local.get("current_user_id");
+        return `privacy_settings_${userId}`;
+    }
+
     config() {
         return {
             view: "scrollview",
             scroll: "y",
             body: {
-
                 rows: [
                     {
                         view: "form",
@@ -37,7 +41,7 @@ export default class PrivacySettingsView extends JetView {
                             { height: 20 },
 
                             // ACCOUNT PRIVACY
-                            { template: "Account Privacy", type: "section", css: { "text-align": "center", "font-size": "18px" } },
+                            { template: "Account Privacy", type: "header", css: { "text-align": "left", "font-size": "18px" } },
                             {
                                 view: "radio",
                                 name: "account_privacy",
@@ -52,7 +56,7 @@ export default class PrivacySettingsView extends JetView {
                             { height: 20 },
 
                             // ACTIVITY STATUS
-                            { template: "Activity Status", type: "section", css: { "text-align": "center", "font-size": "18px" } },
+                            { template: "Activity Status", type: "header", css: { "text-align": "left", "font-size": "18px" } },
                             {
                                 view: "switch",
                                 name: "show_activity",
@@ -73,7 +77,7 @@ export default class PrivacySettingsView extends JetView {
                             { height: 20 },
 
                             // TWO-FACTOR AUTHENTICATION
-                            { template: "Two-Factor Authentication", type: "section", css: { "text-align": "center", "font-size": "18px" } },
+                            { template: "Two-Factor Authentication", type: "header", css: { "text-align": "center", "font-size": "18px" } },
                             {
                                 view: "switch",
                                 name: "two_factor",
@@ -106,8 +110,8 @@ export default class PrivacySettingsView extends JetView {
                                     {
                                         view: "button",
                                         value: "Delete Account",
-                                        css: "webix_danger",
                                         width: 140,
+                                        css: "webix_danger delete_button_force", 
                                         click: () => this.deleteAccount()
                                     },
                                     {}, 
@@ -136,7 +140,8 @@ export default class PrivacySettingsView extends JetView {
     }
     init() {
         const form = this.$$("privacyForm");
-        const storedData = webix.storage.local.get(this.STORAGE_KEY);
+        const key = this.getStorageKey(); 
+        const storedData = webix.storage.local.get(key) || webix.storage.local.get(this.STORAGE_KEY);
         
         if (storedData) {
             form.setValues(storedData);
@@ -147,11 +152,12 @@ export default class PrivacySettingsView extends JetView {
 
         this.update2FAState(form.getValues().two_factor);
     }
+
     loadFromAPI(form) {
         PrivacyService.loadSettings()
             .then(data => {
                 form.setValues(data);
-                webix.storage.local.put(this.STORAGE_KEY, data); 
+                webix.storage.local.put(this.getStorageKey(), data); 
                 webix.message({ type: "success", text: "Settings fetched from server." });
             })
             .catch(() => {
@@ -171,7 +177,7 @@ export default class PrivacySettingsView extends JetView {
 
         PrivacyService.saveSettings(values)
             .then(() => {
-                webix.storage.local.put(this.STORAGE_KEY, values);
+                webix.storage.local.put(this.getStorageKey(), values);
                 webix.message({ type: "success", text: "Saved permanently & session updated!" });
             })
             .catch(() => {
@@ -191,7 +197,7 @@ export default class PrivacySettingsView extends JetView {
         form.setValues(defaultValues);
         this.update2FAState(0);
         
-        webix.storage.local.remove(this.STORAGE_KEY);
+        webix.storage.local.remove(this.getStorageKey());
         
         webix.message("Privacy settings reset to default");
     }
@@ -201,10 +207,34 @@ export default class PrivacySettingsView extends JetView {
             title: "Delete Account",
             text: "Are you sure you want to delete your account? This action cannot be undone.",
             ok: "Delete",
-            cancel: "Cancel"
+            cancel: "Cancel",
+            type: "confirm-error"
         }).then(() => {
-            webix.storage.local.remove(this.STORAGE_KEY);
-            webix.message("Account deletion initiated.");
+            const token = webix.storage.local.get("token");
+            webix.ajax()
+                .headers({ 
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                })
+                .del("http://127.0.0.1:8000/api/settings/delete-account/")
+                .then(() => {
+                    webix.storage.local.remove("token");
+                    webix.storage.local.remove("current_user_id");
+                    webix.storage.local.remove(this.getStorageKey());
+
+                    webix.message({ type: "success", text: "Account deleted successfully." });
+
+                    setTimeout(() => {
+                        window.location.href = "#!/login";
+                        window.location.reload();
+                    }, 1000);
+                })
+                .fail((err) => {
+                    console.error("Delete failed status:", err.status); 
+                    console.error("Server response:", err.responseText);
+                
+                    let msg = "Could not delete account.";
+                });
         });
     }
 }

@@ -39,7 +39,7 @@ export default class NotificationSettingsView extends JetView {
                             },
                             { height: 20 },
 
-                            { template: "EMAIL NOTIFICATIONS", type: "section", css: { "text-align": "center", "font-size": "18px" } },
+                            { template: "EMAIL NOTIFICATIONS", type: "header", css: { "text-align": "left", "font-size": "18px" } },
                             {
                                 view: "switch",
                                 label: "Enable Email Notifications",
@@ -61,7 +61,7 @@ export default class NotificationSettingsView extends JetView {
                             },
 
                             { height: 10 },
-                            { template: "NOTIFICATION FREQUENCY", type: "section", css: { "text-align": "center", "font-size": "18px" } },
+                            { template: "NOTIFICATION FREQUENCY", type: "header", css: { "text-align": "left", "font-size": "18px" } },
                             {
                                 view: "radio",
                                 name: "frequency",
@@ -75,7 +75,7 @@ export default class NotificationSettingsView extends JetView {
                             },
 
                             { height: 10 },
-                            { template: "NOTIFICATION SOUND", type: "section", css: { "text-align": "center", "font-size": "18px" } },
+                            { template: "NOTIFICATION SOUND", type: "header", css: { "text-align": "left", "font-size": "18px" } },
                             {
                                 view: "switch",
                                 label: "Play sound for notifications",

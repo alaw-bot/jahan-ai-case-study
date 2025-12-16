@@ -1,6 +1,7 @@
-
 :root {
     --app-font-size: 14px; 
+    --app-font-family: "Roboto",
+    --app-accent-color: #4707de;
 }
 
 .description_text { color: #666; font-size: 13px; line-height: 1.2; background: transparent; }
@@ -9,8 +10,8 @@
 .webix_view, .webix_el_label, .webix_label_right, 
 .webix_el_box input, .webix_el_box select, .webix_inp_static, 
 .webix_template, .webix_list_item, .webix_button, 
-.webix_header, .webix_window, 
-.webix_segment_0, .webix_segment_1, .webix_segment_N {
+.webix_header, .webix_window,.webix_inp_label,.webix_el_box,
+.webix_inp_top_label,.webix_segment_0, .webix_segment_1, .webix_segment_N {
     font-size: var(--app-font-size) !important;
 }
 
@@ -18,6 +19,7 @@
     font-size: calc(var(--app-font-size) + 4px) !important;
 }
 
+/*DARK MODE*/
 body.webix_dark, body.webix_dark .webix_view, body.webix_dark .webix_layout_line { 
     background-color: #2b2b2b !important; 
 }
@@ -28,23 +30,155 @@ body.webix_dark .webix_header > div, body.webix_dark .webix_button, body.webix_d
 body.webix_dark .description_text { color: #bbbbbb !important; }
 body.webix_dark .value_label .webix_el_box { color: #ffffff !important; }
 
-body.webix_dark input, body.webix_dark select, body.webix_dark .webix_inp_static,
-body.webix_dark .webix_segment_0, body.webix_dark .webix_segment_1, body.webix_dark .webix_segment_N { 
+body.webix_dark input, body.webix_dark select, body.webix_dark .webix_inp_static,body.webix_dark .section_title_text,
+body.webix_dark .section_subtitle_text,body.webix_dark .webix_segment_0, body.webix_dark .webix_segment_1, body.webix_dark .webix_segment_N { 
     background-color: #3b3b3b !important; color: #fff !important; border-color: #555 !important; 
 }
 body.webix_dark .webix_popup, body.webix_dark .webix_list {
     background-color: #3b3b3b !important; border: 1px solid #555 !important;
 }
-body.webix_dark .webix_list_item { color: #ffffff !important; background-color: #3b3b3b; }
+body.webix_dark .webix_list_item { color: #d21b1b !important; background-color: #3b3b3b; }
 body.webix_dark .webix_list_item:hover, body.webix_dark .webix_list_item.webix_selected {
     background-color: #555555 !important; color: #ffffff !important;
 }
 
 
+/*HIGH CONTRAST MODE */
+body.hc_mode, 
+body.hc_mode .webix_view, 
+body.hc_mode .webix_layout_clean, 
+body.hc_mode .webix_layout_line,
+body.hc_mode .webix_scroll_cont,
+body.hc_mode .webix_window,
+body.hc_mode .webix_popup,
+body.hc_mode .webix_list {
+    background-color: #000000 !important;
+}
 
 
+body.hc_mode, 
+body.hc_mode .webix_template, 
+body.hc_mode .webix_el_label, 
+body.hc_mode label, 
+body.hc_mode span, 
+body.hc_mode div, 
+body.hc_mode strong,
+body.hc_mode .description_text,
+body.hc_mode .value_label,
+body.hc_mode .webix_view,
+body.hc_mode .value_label .webix_el_box {
+    color: #FFFF00 !important;
+}
 
+body.hc_mode input, 
+body.hc_mode select, 
+body.hc_mode textarea, 
+body.hc_mode .webix_inp_static,
+body.hc_mode .webix_el_box select {
+    background-color: #000000 !important;
+    color: #FFFF00 !important;
+    border: 1px solid #FFFF00 !important;
+}
 
+body.hc_mode .webix_header > div {
+    background-color: #000000 !important;
+    color: #FFFF00 !important;
+    border-bottom: 2px solid #FFFF00 !important;
+}
 
+body.hc_mode .webix_el_button button {
+    background-color: #000000 !important;
+    color: #FFFF00 !important;
+    border: 2px solid #FFFF00 !important;
+    font-weight: bold;
+}
+body.hc_mode .webix_el_button button:hover {
+    background-color: #333333 !important;
+}
 
+body.hc_mode .webix_segment_0, 
+body.hc_mode .webix_segment_1, 
+body.hc_mode .webix_segment_N {
+    background-color: #000000 !important;
+    color: #FFFF00 !important;
+    border-color: #FFFF00 !important;
+}
+
+body.hc_mode .webix_list_item { 
+    color: #FFFF00 !important; 
+    background-color: #000000 !important; 
+    border-bottom: 1px solid #FFFF00 !important;
+}
+body.hc_mode .webix_list_item:hover, 
+body.hc_mode .webix_list_item.webix_selected {
+    background-color: #FFFF00 !important; 
+    color: #000000 !important;
+}
+
+.webix_view, 
+.webix_el_label, 
+.webix_label_right, 
+.webix_inp_label,       
+.webix_inp_top_label,   
+.webix_inp_static, 
+.webix_template, 
+.webix_list_item, 
+.webix_button, 
+.webix_header, 
+.webix_window, 
+.webix_el_box {
+    font-size: var(--app-font-size) !important;
+    font-family: var(--app-font-family) !important;
+}
+
+.webix_segment_0.webix_selected,
+.webix_segment_1.webix_selected,
+.webix_segment_N.webix_selected,
+body.webix_dark .webix_segment_0.webix_selected,
+body.webix_dark .webix_segment_1.webix_selected,
+body.webix_dark .webix_segment_N.webix_selected {
+    background-color: var(--app-accent-color) !important;
+    border-color: var(--app-accent-color) !important;
+    color: #ffffff !important;
+}
+
+.webix_view .webix_button:not(.webix_danger) button, 
+.webix_view .webix_button:not(.webix_danger),
+body.webix_dark .webix_view .webix_button:not(.webix_danger) button, 
+body.webix_dark .webix_view .webix_button:not(.webix_danger) {
+    background-color: var(--app-accent-color) !important;
+    border-color: var(--app-accent-color) !important;
+    color: #ffffff !important;
+}
+
+.webix_switch_active,
+body.webix_dark .webix_switch_active {
+    background-color: var(--app-accent-color) !important;
+    border-color: var(--app-accent-color) !important;
+    color: #ffffff !important;
+}
+
+.webix_slider_left,
+body.webix_dark .webix_slider_left {
+    background-color: var(--app-accent-color) !important;
+}
+.webix_slider_handle,
+body.webix_dark .webix_slider_handle {
+    border-color: var(--app-accent-color) !important;
+    background-color: var(--app-accent-color) !important;
+    box-shadow: 0 0 3px var(--app-accent-color) !important; 
+}
+
+.webix_radio_1 .webix_custom_radio,
+.webix_checkbox_1 .webix_custom_checkbox,
+body.webix_dark .webix_radio_1 .webix_custom_radio,
+body.webix_dark .webix_checkbox_1 .webix_custom_checkbox {
+    color: var(--app-accent-color) !important;
+}
+
+.webix_list_item.webix_selected,
+body.webix_dark .webix_list_item.webix_selected {
+    background-color: var(--app-accent-color) !important;
+    color: #ffffff !important;
+}
 

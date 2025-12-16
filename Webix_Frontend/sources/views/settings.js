@@ -1,8 +1,9 @@
 import { JetView, plugins } from "webix-jet";
-import "../styles/settings.css";
-import "webix/webix.css";      
-export default class SettingsPage extends JetView {
+import "webix/webix.css";         
+import "../styles/settings.css";    
 
+export default class SettingsPage extends JetView {
+    
     config() {
         return {
             cols: [
@@ -76,9 +77,24 @@ export default class SettingsPage extends JetView {
     }
 
     logout() {
-        webix.confirm("Are you sure you want to logout?").then(() => {
-            localStorage.clear();
-            this.app.show("/login");
+        webix.confirm({
+            title: "Logout",
+            text: "Are you sure you want to logout?",
+            ok: "Yes",
+            cancel: "No",
+            css: "custom_confirm"
+        }).then(() => {
+            const userId = webix.storage.local.get("current_user_id");
+            const userSettings = localStorage.getItem(`app_settings_${userId}`);
+            if (userSettings) {
+                localStorage.setItem("app_settings_guest", userSettings);
+            }
+
+            webix.storage.local.remove("token");
+            webix.storage.local.remove("current_user_id");
+
+            window.location.href = "#!/login";
+            window.location.reload();
         });
     }
 }

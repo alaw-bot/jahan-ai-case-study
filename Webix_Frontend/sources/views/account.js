@@ -18,6 +18,24 @@ export default class SettingsView extends JetView {
         return { text: "", css: "" };
     }
 
+    getRequirementsHTML(password) {
+        const checks = [
+            { label: "8+ Chars", valid: password.length >= 8 },
+            { label: "Upper & Lower", valid: /[a-z]/.test(password) && /[A-Z]/.test(password) },
+            { label: "Number", valid: /\d/.test(password) },
+            { label: "Symbol", valid: /[!@#$%^&*(),.?":{}|<>]/.test(password) }
+        ];
+
+        let html = `<div class="pass_reqs">`;
+        checks.forEach(c => {
+            const icon = c.valid ? "✔" : "○";
+            const css = c.valid ? "req_item done" : "req_item missing";
+            html += `<span class="${css}">${icon} ${c.label}</span>`;
+        });
+        html += `</div>`;
+        return html;
+    }
+
     config() {
         const countries = [
             { id: "LK", value: "Sri Lanka" },
@@ -48,35 +66,12 @@ export default class SettingsView extends JetView {
         ];
 
         const profileElements = [
-            // {
-            //     css: { 
-            //         "background-color": "rgba(127, 127, 127, 0.1)", // Adaptive background
-            //         "border-radius": "8px", 
-            //         "padding": "15px", 
-            //         "margin-bottom": "20px" 
-            //     }, 
-            //     rows: [
-            //         { 
-            //             template: "Privacy Settings", 
-            //             type: "clean", 
-            //             autoheight: true, 
-            //             css: { 
-            //                 "font-size": "24px", 
-            //                 "font-weight": "600"
-    
-            //             } 
-            //         },
-            //         { 
-            //             template: "Control your privacy and data sharing preferences", 
-            //             type: "clean", 
-            //             height: 25, 
-            //             css: { 
-            //                 "opacity": ".7", // Opacity -> adapts to Theme brightness
-            //                 "font-size": "14px" 
-            //             } 
-            //         }
-            //     ]
-            // },
+            {
+                rows: [
+                    { view: "label", label: "Profile Information", css: "section_header", align: "left" },
+                    { view: "label", label: "Update your photo and personal details", css: "section_subtitle", align: "left" }
+                ]
+            },
             { height: 20 },
             {
                 cols: [
@@ -94,42 +89,25 @@ export default class SettingsView extends JetView {
                                 view: "uploader", 
                                 value: "Upload New Photo", 
                                 localId: "photo_uploader", 
-                                
-                                autosend: false,                
+                                upload: "http://127.0.0.1:8000/api/settings/avatar-upload/", 
+                                autosend: true, 
                                 name: "upload", 
                                 accept: "image/*", 
                                 width: 160, 
                                 css: "webix_primary",
                                 on: {
-                                    onAfterFileAdd: function(item){
-                                        const file = item.file;
-                                        const token = webix.storage.local.get("token");
-
-                                        const formData = new FormData();
-                                        formData.append("upload", file);
-
-                                        webix.ajax()
-                                            .headers({ "Authorization": "Bearer " + token }) 
-                                            .post("http://127.0.0.1:8000/api/settings/avatar-upload/", formData)
-                                            .then((res) => {
-                                                const response = res.json();
-
-                                                if (response && response.url) {
-                                                    let fullUrl = response.url;
-                                                    if (!fullUrl.startsWith("http")) {
-                                                        fullUrl = "http://127.0.0.1:8000" + fullUrl;
-                                                    }
-                                                    
-                                                    this.$scope.$$("avatar_preview").setValues({ src: fullUrl });
-                                                    webix.message({type:"success", text: "Photo saved!"});
-                                                }
-                                            })
-                                            .fail((err) => {
-                                                webix.message({type:"error", text: "Upload failed."});
-                                                console.error("Upload Error:", err);
-                                            });
-                                            
-                                        return false; 
+                                    onFileUpload: (file, response) => {
+                                        if (response && response.url) {
+                                            let fullUrl = response.url;
+                                            if (!fullUrl.startsWith("http")) {
+                                                fullUrl = "http://127.0.0.1:8000" + fullUrl;
+                                            }
+                                            this.$$("avatar_preview").setValues({ src: fullUrl });
+                                            webix.message({type:"success", text: "Photo saved!"});
+                                        }
+                                    },
+                                    onUploadFail: (file, response) => {
+                                         webix.message({type:"error", text: "Upload failed."});
                                     }
                                 }
                             },
@@ -215,7 +193,7 @@ export default class SettingsView extends JetView {
                             ]},
                             { height: 20 },
                             ...profileElements,
-                            { height: 10 },     
+                            { height: 10 },
                             ...securityElements,
                             { height: 20 }
                         ]
@@ -332,6 +310,9 @@ export default class SettingsView extends JetView {
             const form = this._passWindow.getBody();
             form.clear();
             form.clearValidation();
+
+            const meter = this._passWindow.getBody().queryView({ localId: "password_feedback" });
+            if(meter) meter.setHTML(""); 
             return;
         }
 
@@ -347,19 +328,32 @@ export default class SettingsView extends JetView {
                 elementsConfig: { labelPosition: "top", bottomPadding: 15 },
                 elements: [
                     { view: "text", type: "password", label: "Old Password", name: "old_pass", placeholder: "Enter current password", required: true },
+                    
                     { 
                         view: "text", type: "password", label: "New Password", name: "new_pass", placeholder: "Enter new password", required: true,
                         localId: "new_pass_input",
                         on: {
-                            onKeyup: (code, event) => {
-                                const val = event.target.value;
+                            onTimedKeyPress: () => {
+                                const form = this._passWindow.getBody();
+                                const val = form.queryView({ localId: "new_pass_input" }).getValue();
+                                
                                 const strength = this.checkPasswordStrength(val);
-                                const meter = this._passWindow.getBody().queryView({ localId: "strength_meter_modal" });
-                                if (meter) meter.setHTML(`<div class="strength_bar ${strength.css}"></div><div class="strength_text ${strength.css}">${strength.text}</div>`);
+                                const reqsHTML = this.getRequirementsHTML(val);
+
+                                const html = `
+                                    <div class="strength_text ${strength.css}">${strength.text}</div>
+                                    <div class="strength_bar ${strength.css}"></div>
+                                    ${reqsHTML}
+                                `;
+
+                                const feedbackView = form.queryView({ localId: "password_feedback" });
+                                if (feedbackView) feedbackView.setHTML(html);
                             }
                         }
                     },
-                    { view: "template", localId: "strength_meter_modal", height: 20, borderless: true, css: "strength_container" },
+
+                    { view: "template", localId: "password_feedback", height: 60, borderless: true, css: "strength_container", template: "" },
+
                     { view: "text", type: "password", label: "Confirm Password", name: "confirm_pass", placeholder: "Re-enter new password", required: true },
                     
                     { 

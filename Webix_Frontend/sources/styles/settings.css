@@ -127,3 +127,31 @@
 .webix_dark .webix_popup_button:not(.confirm):hover {
     background-color: rgba(255, 255, 255, 0.1) !important;
 }
+
+body .webix_view .webix_danger.delete_button_force button,
+body.webix_dark .webix_view .webix_danger.delete_button_force button {
+    background-color: #ef4444 !important;
+    border-color: #ef4444 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    text-shadow: none !important;
+}
+
+body .webix_view .webix_danger.delete_button_force button:hover,
+body.webix_dark .webix_view .webix_danger.delete_button_force button:hover {
+    background-color: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #ffffff !important;
+}
+
+body .webix_view .webix_danger.delete_button_force button:active,
+body.webix_dark .webix_view .webix_danger.delete_button_force button:active {
+    background-color: #b91c1c !important; 
+    transform: translateY(1px);
+}
+
+body .webix_view .webix_danger.delete_button_force button:focus,
+body.webix_dark .webix_view .webix_danger.delete_button_force button:focus {
+    box-shadow: none !important;
+    outline: none !important;
+}

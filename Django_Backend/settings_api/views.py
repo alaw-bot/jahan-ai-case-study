@@ -56,7 +56,7 @@ class AvatarUploadView(APIView):
             return Response({"error": "No file attached."}, status=status.HTTP_400_BAD_REQUEST)
 
         avatar_file = request.FILES['upload']
-        
+
         profile.avatar = avatar_file
         profile.save()
 
@@ -65,3 +65,12 @@ class AvatarUploadView(APIView):
             "name": avatar_file.name,
             "url": profile.avatar.url
         }, status=status.HTTP_201_CREATED)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        user.delete()
+        return Response({"detail": "Account deleted successfully"}, status=status.HTTP_200_OK)

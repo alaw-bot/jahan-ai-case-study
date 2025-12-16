@@ -1,9 +1,10 @@
 import {JetView} from "webix-jet";
 import * as webix from "webix";
+import "../styles/login.css"; 
 
 export default class LoginView extends JetView {
 
-    // 1. Helper: Calculate Score
+
     checkPasswordStrength(password) {
         let strength = 0;
         if (password.length >= 8) strength++;
@@ -18,7 +19,6 @@ export default class LoginView extends JetView {
         return { text: "", css: "" };
     }
 
-    // 2. Helper: Generate Recommendation HTML
     getRequirementsHTML(password) {
         const checks = [
             { label: "8+ Chars", valid: password.length >= 8 },
@@ -37,92 +37,117 @@ export default class LoginView extends JetView {
         return html;
     }
 
+
     config() {
         const loginForm = {
             view: "form", localId: "loginForm",
-            rules: {
-                "username": webix.rules.isNotEmpty,
-                "password": webix.rules.isNotEmpty
-            },
+            padding: 0, borderless: true,
+            rules: { "username": webix.rules.isNotEmpty, "password": webix.rules.isNotEmpty },
             elements: [
-                { view: "text", label: "Username", name: "username", invalidMessage: "Username is required", labelWidth: 100 },
-                { view: "text", type: "password", label: "Password", name: "password", invalidMessage: "Password is required", labelWidth: 100 },
-                { margin: 10, cols: [
-                    { view: "button", value: "Login", css: "webix_primary", click: () => this.doLogin() }
-                ]}
+                { template: "<span class='header_title'>Sign in</span>", height: 50, borderless: true },
+                { template: "<span class='sub_title'>Welcome back to MyApp</span>", height: 30, borderless: true },
+                { height: 30 },
+                
+                { 
+                    view: "text", label: "Username or Email", name: "username", 
+                    labelPosition: "top", placeholder: "Enter your username", 
+                    invalidMessage: "Required", css: "modern_input",
+                    height: 90 
+                },
+                { 
+                    view: "text", type: "password", label: "Password", name: "password", 
+                    labelPosition: "top", placeholder: "••••••••", 
+                    invalidMessage: "Required", css: "modern_input",
+                    height: 90 
+                },
+                
+                { template: "<a href='#' class='forgot_link'>Forgot password?</a>", height: 20, borderless: true, css: "text_right" },
+                { height: 20 },
+                { view: "button", value: "Sign in", css: "webix_primary teal_button", height: 50, click: () => this.doLogin() },
+                { height: 20 },
+                { template: "Don't have an account? <span class='switch_link'>Create now</span>", height: 30, borderless: true, css: "text_center switch_text", onClick: { "switch_link": () => this.toggleForm("register") } }
             ]
         };
 
         const registerForm = {
             view: "form", localId: "registerForm",
-            hidden: true, 
-            rules: {
-                "username": webix.rules.isNotEmpty,
-                "email": webix.rules.isEmail,
-                "password": webix.rules.isNotEmpty,
-                "confirm_password": webix.rules.isNotEmpty
-            },
+            hidden: true, padding: 0, borderless: true,
+            rules: { "username": webix.rules.isNotEmpty, "email": webix.rules.isEmail, "password": webix.rules.isNotEmpty, "confirm_password": webix.rules.isNotEmpty },
             elements: [
-                { view: "text", label: "Username", name: "username", invalidMessage: "Required", labelWidth: 120 },
-                { view: "text", label: "Email", name: "email", invalidMessage: "Invalid Email", labelWidth: 120 },
+                { template: "<span class='header_title'>Create Account</span>", height: 50, borderless: true },
+                { template: "<span class='sub_title'>Start your journey with us</span>", height: 30, borderless: true },
+                { height: 20 },
+                
+                { view: "text", label: "Username", name: "username", labelPosition: "top", placeholder: "Choose a username", invalidMessage: "Required", css: "modern_input", height: 90 },
+                { view: "text", label: "Email", name: "email", labelPosition: "top", placeholder: "name@company.com", invalidMessage: "Invalid Email", css: "modern_input", height: 90 },
                 { 
-                    view: "text", type: "password", label: "Password", name: "password", invalidMessage: "Required", labelWidth: 120,
+                    view: "text", type: "password", label: "Password", name: "password", labelPosition: "top", placeholder: "Strong password", invalidMessage: "Required", css: "modern_input", height: 90,
                     localId: "reg_pass",
-                    on: {
-                        onTimedKeyPress: () => {
-                            const form = this.$$("registerForm");
-                            const val = form.queryView({ localId: "reg_pass" }).getValue();
-
-                            const strength = this.checkPasswordStrength(val);
-                            const reqsHTML = this.getRequirementsHTML(val);
-
-                            const html = `
-                                <div class="strength_text ${strength.css}">${strength.text}</div>
-                                <div class="strength_bar ${strength.css}"></div>
-                                ${reqsHTML}
-                            `;
-                            const feedback = form.queryView({ localId: "reg_feedback" });
-                            if(feedback) feedback.setHTML(html);
-                        }
-                    }
+                    on: { onTimedKeyPress: () => { 
+                        const form = this.$$("registerForm"); const val = form.queryView({ localId: "reg_pass" }).getValue(); 
+                        const strength = this.checkPasswordStrength(val); const reqsHTML = this.getRequirementsHTML(val); 
+                        const html = `<div class="strength_text ${strength.css}">${strength.text}</div><div class="strength_bar ${strength.css}"></div>${reqsHTML}`; 
+                        const feedback = form.queryView({ localId: "reg_feedback" }); if(feedback) feedback.setHTML(html); 
+                    } }
                 },
-                { view: "template", localId: "reg_feedback", height: 60, borderless: true, css: "strength_container", template: "" },
-                { view: "text", type: "password", label: "Confirm Password", name: "confirm_password", invalidMessage: "Required", labelWidth: 120 },
-                { margin: 10, cols: [
-                    { view: "button", value: "Register", css: "webix_primary", click: () => this.doRegister() }
-                ]}
+                { view: "template", localId: "reg_feedback", height: 90, borderless: true, css: "strength_container", template: "" },
+                { view: "text", type: "password", label: "Confirm Password", name: "confirm_password", labelPosition: "top", placeholder: "Repeat password", invalidMessage: "Required", css: "modern_input", height: 90 },
+                
+                { height: 10 },
+                { view: "button", value: "Register", css: "webix_primary teal_button", height: 50, click: () => this.doRegister() },
+                { height: 20 },
+                { template: "Already have an account? <span class='switch_link'>Sign in</span>", height: 30, borderless: true, css: "text_center switch_text", onClick: { "switch_link": () => this.toggleForm("login") } }
             ]
         };
 
         return {
-            view: "window",
-            modal: true,
-            position: "center",
-            width: 400,
-            head: {
-                view: "toolbar", cols: [
-                    { view: "label", label: "Welcome" },
-                    { view: "segmented", width: 200, options: [
-                        { id: "login", value: "Login" },
-                        { id: "register", value: "Sign Up" }
-                    ], on: {
-                        onChange: (id) => this.toggleForm(id)
-                    }}
-                ]
-            },
-            body: {
-                rows: [
-                    loginForm,
-                    registerForm
-                ]
-            }
+            css: "login_page_bg",
+            cols: [
+                {
+                    css: "left_panel_white",
+                    gravity: 0.8,
+                    rows: [
+                        {}, 
+                        {
+                            cols: [
+                                {}, 
+                                {
+                                    width: 420, 
+                                    rows: [
+                                        { template: "<span class='brand_logo'>@MyApp</span>", height: 60, borderless: true },
+                                        loginForm,
+                                        registerForm
+                                    ]
+                                },
+                                {} 
+                            ]
+                        },
+                        {} 
+                    ]
+                },
+                {
+                    css: "right_panel_teal",
+                    template: `
+                        <div class="promo_container_full">
+                            <div class="promo_content_centered">
+                                <h2 class="promo_header_large">Reach your financial goals.</h2>
+                                <p class="promo_text_large">
+                                    Manage your income, track expenses, and save for the future with our intuitive tools.
+                                </p>
+                                <div class="glass_card_large">
+                                    <div class="card_icon"></div>
+                                    <span>Total Balance</span>
+                                    <h3>$14,290.40</h3>
+                                    <div class="card_chip">•••• 4829</div>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                }
+            ]
         };
     }
-
-    init(){
-        this.getRoot().show();
-    }
-
+    init(){ this.getRoot().show(); }
     toggleForm(mode) {
         if (mode === "login") {
             this.$$("loginForm").show();
@@ -132,8 +157,7 @@ export default class LoginView extends JetView {
             this.$$("registerForm").show();
         }
     }
-
-    doLogin() {
+    doLogin() { 
         const form = this.$$("loginForm");
         if (form.validate()) {
             const data = form.getValues();
@@ -143,21 +167,14 @@ export default class LoginView extends JetView {
                 const result = res.json();
                 webix.storage.local.put("token", result.access); 
                 let userId = "guest";
-
-                if (result.user_id) {
-                    userId = result.user_id;
-                } else if (result.username) {
-                    userId = result.username.toLowerCase();
-                } else {
-                    userId = data.username.toLowerCase();
-                }
+                if (result.user_id) userId = result.user_id;
+                else if (result.username) userId = result.username.toLowerCase();
+                else userId = data.username.toLowerCase();
 
                 webix.storage.local.put("current_user_id", userId);
                 
                 console.log("Saving Settings for User ID:", userId);
-
                 webix.message({ type: "success", text: "Login Successful" });
-                this.getRoot().close();
 
                 window.location.href = "#!/settings/account";
                 window.location.reload(); 
@@ -168,19 +185,12 @@ export default class LoginView extends JetView {
             });
         }
     }
-    doRegister() {
+    doRegister() { 
         const form = this.$$("registerForm");
         if (form.validate()) {
             const data = form.getValues();
-            if(data.password !== data.confirm_password){
-                webix.message({type:"error", text: "Passwords do not match"});
-                return;
-            }
-            if (this.checkPasswordStrength(data.password).css === "weak") { 
-                webix.message({ type: "error", text: "Password is too weak." }); 
-                return; 
-            }
-
+            if(data.password !== data.confirm_password){ webix.message({type:"error", text: "Passwords do not match"}); return; }
+            if (this.checkPasswordStrength(data.password).css === "weak") { webix.message({ type: "error", text: "Password is too weak." }); return; }
             webix.ajax().post("http://127.0.0.1:8000/api/settings/register/", data).then(() => {
                 webix.message({ type: "success", text: "Registration Successful! Please Login." });
                 this.$$("loginForm").show();
@@ -192,7 +202,6 @@ export default class LoginView extends JetView {
                 let msg = "Registration Failed";
                 if(response.username) msg = "Username: " + response.username[0];
                 else if(response.email) msg = "Email: " + response.email[0];
-                
                 webix.message({ type: "error", text: msg });
             });
         }

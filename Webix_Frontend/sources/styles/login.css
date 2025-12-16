@@ -1,0 +1,172 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.full_screen_layout {
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+    height: 100vh;
+}
+
+.left_panel_white {
+    background-color: #ffffff;
+}
+
+.right_panel_teal {
+    background-color: #1CA1C1;
+    background: linear-gradient(135deg, #1CA1C1 0%, #0e7490 100%);
+    position: relative;
+}
+
+.brand_logo {
+    font-size: 24px;
+    font-weight: 800;
+    color: #111827;
+    letter-spacing: -0.5px;
+}
+
+.header_title {
+    font-size: 36px;
+    font-weight: 800;
+    color: #111827;
+    letter-spacing: -1px;
+    line-height: 1;
+}
+
+.sub_title {
+    font-size: 16px;
+    color: #64748b;
+    font-weight: 400;
+}
+
+.modern_input input {
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    background-color: #ffffff !important;
+    padding-left: 16px;
+    height: 50px !important; 
+    font-size: 15px;
+    color: #334155;
+    transition: all 0.2s ease;
+}
+
+.modern_input input:focus {
+    border-color: #1CA1C1 !important;
+    box-shadow: 0 0 0 4px rgba(28, 161, 193, 0.1) !important;
+}
+
+.webix_el_text label {
+    font-size: 14px;
+    color: #374151;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.teal_button button {
+    background-color: #1CA1C1 !important;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    transition: transform 0.1s ease, background-color 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.teal_button button:hover {
+    background-color: #158a9e !important;
+}
+
+.teal_button button:active {
+    transform: translateY(1px);
+}
+
+.forgot_link {
+    color: #1CA1C1;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.switch_text { font-size: 14px; color: #64748b; }
+.switch_link {
+    color: #1CA1C1;
+    font-weight: 700;
+    cursor: pointer;
+}
+.text_right { text-align: right; }
+.text_center { text-align: center; }
+
+.promo_container_full {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    padding: 60px;
+}
+
+.promo_content_centered {
+    max-width: 500px;
+    text-align: center;
+}
+
+.promo_header_large {
+    font-size: 48px; 
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 24px;
+}
+
+.promo_text_large {
+    font-size: 18px;
+    opacity: 0.9;
+    line-height: 1.6;
+    margin-bottom: 60px;
+}
+
+.glass_card_large {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: left;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    transform: rotate(-3deg);
+    transition: transform 0.4s ease;
+}
+
+.glass_card_large:hover {
+    transform: rotate(0deg) scale(1.02);
+}
+
+.glass_card_large span {
+    display: block;
+    font-size: 14px;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+}
+
+.glass_card_large h3 {
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0 0 20px 0;
+}
+
+.card_chip {
+    font-family: monospace;
+    font-size: 16px;
+    opacity: 0.9;
+    letter-spacing: 3px;
+}
+
+.strength_container { padding-top: 8px; }
+.strength_text { font-size: 11px; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; }
+.strength_bar { height: 4px; border-radius: 2px; background-color: #e2e8f0; margin-bottom: 8px; transition: width 0.3s; }
+.weak { color: #ef4444; } .strength_bar.weak { background-color: #ef4444; width: 33%; }
+.medium { color: #f59e0b; } .strength_bar.medium { background-color: #f59e0b; width: 66%; }
+.strong { color: #10b981; } .strength_bar.strong { background-color: #10b981; width: 100%; }
+.pass_reqs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+.req_item { font-size: 10px; padding: 3px 8px; border-radius: 12px; border: 1px solid #e2e8f0; color: #64748b; background: #fff; }
+.req_item.done { background-color: #dcfce7; border-color: #86efac; color: #166534; }

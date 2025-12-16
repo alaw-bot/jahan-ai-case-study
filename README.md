@@ -1,145 +1,178 @@
-## User Preferences Application
+# User Preferences Application
 
-A full‑stack web application for managing user preferences, built with **Django REST Framework** (backend) and **Webix Jet** (frontend).  
+A full‑stack web application for managing user preferences, built with Django REST Framework (backend) and Webix Jet (frontend).
 This system provides user account management including authentication, profile customization, password changes, avatar upload, and a rich settings UI with theme and accessibility options.
-
----
 
 ## Features
 
 - **Authentication**
-  - User registration and login with **JWT token-based authentication** (Simple JWT)
-  - Protected API endpoints using `Bearer` tokens
+- User registration and login with JWT token-based authentication (Simple JWT)
+- Protected API endpoints using Bearer tokens
 
 - **Profile Management**
-  - View and update personal information (display name, bio, phone, country, date of birth, gender)
-  - Upload and store profile avatars
+- View and update personal information (display name, bio, phone, country, date of birth, gender)
+- Upload and store profile avatars
 
 - **Password Management**
-  - Change password with validation against the existing password
+- Change password with validation against the existing password
 
-- **Theme & UI Customization (Frontend)**
-  - Light / dark / auto theme modes
-  - Adjustable font size and font family
-  - High‑contrast mode for accessibility
-  - Per-user UI settings stored
+- **Account Deletion**
+- Secure Account Deletion
 
-- **Settings UI**
-  - Sidebar-based settings layout with sections for:
-    - Account
-    - Notifications
-    - Theme
-    - Privacy 
-  - Logout handling  
+- **Notification Settings**
+- Customize notification preferences including notification sound change and 2FA
 
----
+- **Theme Customization**
+- Sidebar-based settings layout with sections for:
+  Account
+  Notifications
+  Theme
+  Privacy
+- Logout handling
 
 ## Technology Stack
 
-### Backend
+**Backend:**
 
-- **Django 6**
-- **Django REST Framework**
-- **Simple JWT** for authentication
-- **SQLite** database (default; easily replaceable)
+- Django 6
+- Django REST Framework
+- Simple JWT for authentication
+- SQLite database (default; easily replaceable)
 
-### Frontend
+**Frontend:**
 
-- **Webix** and **Webix Jet**
-- **JavaScript (ES modules)**
-- **Vite** dev server and build tooling
+- Webix
+- JavaScript
+- Postman for API testing
+- ESLint for frontend linting
 
-### Testing & Tools
+**Testing:**
 
-- Jest 
-- **Postman** for API testing
-- **ESLint** for frontend linting
-
----
-
-## Project Structure Overview
-## Project Structure Overview
+- Jest
 
 ## Project Structure Overview
 
-<img width="625" height="706" alt="image" src="https://github.com/user-attachments/assets/2576dc1d-ccd5-4770-8eda-5aaf358ea0ac" />
+```
+Project Structure Overview
+────────────────────────────────────────────────────────────────────────────────────────────────
+project-root/
+├── Django_Backend/
+│   ├── user_preferences/      # Django project (settings, URLs, WSGI)
+│   ├── settings_api/          # REST API app (auth, profile, password, avatar)
+│   ├── models.py              # UserProfile model
+│   ├── serializers.py         # Profile, register, change password serializers
+│   ├── urls.py                # API routes under /api/settings/
+│   ├── migrations/            # Database migrations
+│   ├── media/                 # Uploaded media files (avatars)
+│   ├── avatars/               # Stored avatar images
+│   ├── manage.py              # Django management script
+│   ├── Pipfile                # Dependency management
+│   └── Pipfile.lock           # Dependency lock file
+├── Webix_Frontend/
+│   ├── index.html             # App entry HTML
+│   ├── sources/
+│   │   ├── myapp.js           # Main Webix Jet app (routing, auth guard, theme restore)
+│   │   ├── locales/           # i18n files
+│   │   ├── models/            # Example data models
+│   │   ├── views/             # UI views (login, settings, account, theme, privacy)
+│   │   ├── services/          # Notification, privacy, theme helpers (frontend)
+│   │   └── styles/            # CSS files
+│   ├── package.json           # Frontend dependencies
+│   └── package-lock.json      # Dependency lock file
+├── tests/
+│   ├── functional/
+│   │   └── app.guard.functional.test.js   # Functional tests for app guards
+│   └── unit/
+│       ├── auth.guard.unit.test.js        # Unit tests for auth guard
+│       ├── sample.unit.test.js           # Sample unit test
+│       ├── services.auth.unit.test.js    # Unit tests for authentication service
+│       ├── services.notification.unit.test.js   # Unit tests for notification service
+│       ├── services.privacy.unit.test.js     # Unit tests for privacy settings
+│       └── jest.setup.js                  # Jest setup file for unit tests
+└── README.md                 # Frontend-specific instructions
 
+```
 
+## Setup Instructions
 
+### Backend Setup
 
+1. Navigate to the backend directory:
 
-## Backend Setup
+```bash
+cd Django_Backend
+```
 
-From the project root:
+2. Create and activate a virtual environment:
 
-cd Django_Backend### Create and activate a virtual environment
-
+```bash
 # Windows
 python -m venv venv
 venv\Scripts\activate
 
 # macOS/Linux
 python3 -m venv venv
-source venv/bin/activate### Install dependencies
+source venv/bin/activate
+```
 
-If you use **Pipenv** (recommended by the project):
+3. Install dependencies:
 
-pipenv install
-pipenv shellOr, if you prefer a plain `venv` + `pip`, install the packages listed in `Pipfile` manually (or generate a `requirements.txt` from Pipenv).
+```bash
+pip install -r requirements.txt
+```
 
-### Run migrations
+4. Run migrations:
 
-python manage.py migrate### Create a superuser (optional, for Django admin)
+```bash
+python manage.py migrate
+```
 
-python manage.py createsuperuser### Start the development server
+5. Start the development server:
 
-python manage.py runserverThe backend will run at:
+```bash
+python manage.py runserver
+```
 
-http://127.0.0.1:8000API base URL:
+The backend will run at `http://127.0.0.1:8000`
 
-http://127.0.0.1:8000/api/settings/> **Note:** CORS is configured to allow requests from `http://localhost:5173` (the frontend dev server).
+### Frontend Setup
 
----
+1. Navigate to the frontend directory:
 
-## Frontend Setup
+```bash
+cd Webix_Frontend
+```
 
-From the project root:
+2. Install dependencies:
 
-cd Webix_Frontend### Install dependencies
+```bash
+npm install
+```
 
-npm install### Start the development server
+3. Start the development server:
 
-npm startThe frontend will run at:
+```bash
+npm start
+```
 
-http://localhost:5173The frontend automatically:
-
-- Uses Webix Jet routing (starts at `/login`).
-- Attaches JWT tokens from local storage to all AJAX requests.
-- Redirects unauthenticated users back to the login page.
-
----
+The frontend will run at `http://localhost:5173`
 
 ## Testing
 
-### Backend Tests
+### Frontend Tests
 
-If you add Django tests (e.g., under `Django_Backend/settings_api/tests.py`), you can run them with:
+Run all tests:
 
-cd Django_Backend
-python manage.py test### Frontend Linting
+```bash
+npm test
+```
 
-cd Webix_Frontend
-npm run lint---
+### Demo Usage Flow
 
-
-## Demo Usage Flow
-
-1. **Register** a new user via the frontend login/register view or via the `/register/` API.
-2. **Log in** to obtain a JWT; the frontend stores this token in local storage.
-3. Access the **Settings** area:
-   - Edit profile (display name, bio, contact info, etc.).
-   - Upload an **avatar**.
-   - Customize **theme**, font, and high‑contrast mode.
-4. **Logout** from the settings sidebar, which clears the JWT token and redirects back to the login page.
-
----
+- Register a new user via the frontend login/register view or via the /register/ API.
+- Log in to obtain a JWT; the frontend stores this token in local storage.
+- Access the Settings area:
+  Edit profile (display name, bio, contact info, etc.).
+  Upload an avatar.
+  Customize theme, font, and high‑contrast mode.
+- Logout from the settings sidebar, which clears the JWT token and redirects back to the login page.

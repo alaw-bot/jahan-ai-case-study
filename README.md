@@ -62,8 +62,7 @@ This system provides user account management including authentication, profile c
 
 ## Project Structure Overview
 
-
-<img width="711" height="582" alt="image" src="https://github.com/user-attachments/assets/0e777c21-5907-4a19-890e-13812f7f7120" />
+<img width="625" height="706" alt="image" src="https://github.com/user-attachments/assets/2576dc1d-ccd5-4770-8eda-5aaf358ea0ac" />
 
 
 

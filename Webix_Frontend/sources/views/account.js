@@ -3,7 +3,7 @@ import * as webix from "webix";
 import "../styles/account.css";
 
 export default class SettingsView extends JetView {
-    
+
     checkPasswordStrength(password) {
         let strength = 0;
         if (password.length >= 8) strength++;
@@ -38,31 +38,22 @@ export default class SettingsView extends JetView {
 
     config() {
         const countries = [
-            { id: "LK", value: "Sri Lanka" },
-            { id: "AU", value: "Australia" },
-            { id: "US", value: "United States" },
-            { id: "IN", value: "India" },
-            { id: "UK", value: "United Kingdom" },
-            { id: "CA", value: "Canada" },
-            { id: "JP", value: "Japan" },
-            { id: "DE", value: "Germany" }
+            { id: "LK", value: "Sri Lanka" }, { id: "AU", value: "Australia" },
+            { id: "US", value: "United States" }, { id: "IN", value: "India" },
+            { id: "UK", value: "United Kingdom" }, { id: "CA", value: "Canada" },
+            { id: "JP", value: "Japan" }, { id: "DE", value: "Germany" }
         ];
 
         const countryCodes = [
-            { id: "+94", value: "+94 (LK)" },
-            { id: "+61", value: "+61 (AU)" },
-            { id: "+1",  value: "+1 (US/CA)" },
-            { id: "+91", value: "+91 (IN)" },
-            { id: "+44", value: "+44 (UK)" },
-            { id: "+81", value: "+81 (JP)" },
+            { id: "+94", value: "+94 (LK)" }, { id: "+61", value: "+61 (AU)" },
+            { id: "+1",  value: "+1 (US/CA)" }, { id: "+91", value: "+91 (IN)" },
+            { id: "+44", value: "+44 (UK)" }, { id: "+81", value: "+81 (JP)" },
             { id: "+49", value: "+49 (DE)" }
         ];
 
         const genderOptions = [
-            { id: "Male", value: "Male" },
-            { id: "Female", value: "Female" },
-            { id: "Other", value: "Other" },
-            { id: "Prefer not to say", value: "Prefer not to say" }
+            { id: "Male", value: "Male" }, { id: "Female", value: "Female" },
+            { id: "Other", value: "Other" }, { id: "Prefer not to say", value: "Prefer not to say" }
         ];
 
         const profileElements = [
@@ -89,25 +80,38 @@ export default class SettingsView extends JetView {
                                 view: "uploader", 
                                 value: "Upload New Photo", 
                                 localId: "photo_uploader", 
-                                upload: "http://127.0.0.1:8000/api/settings/avatar-upload/", 
-                                autosend: true, 
+                                autosend: false, 
                                 name: "upload", 
                                 accept: "image/*", 
                                 width: 160, 
                                 css: "webix_primary",
                                 on: {
-                                    onFileUpload: (file, response) => {
-                                        if (response && response.url) {
-                                            let fullUrl = response.url;
-                                            if (!fullUrl.startsWith("http")) {
-                                                fullUrl = "http://127.0.0.1:8000" + fullUrl;
-                                            }
-                                            this.$$("avatar_preview").setValues({ src: fullUrl });
-                                            webix.message({type:"success", text: "Photo saved!"});
-                                        }
-                                    },
-                                    onUploadFail: (file, response) => {
-                                         webix.message({type:"error", text: "Upload failed."});
+                                    onAfterFileAdd: function(item){
+                                        const file = item.file;
+                                        const token = webix.storage.local.get("token"); 
+
+                                        const formData = new FormData();
+                                        formData.append("upload", file);
+
+                                        webix.ajax()
+                                            .headers({ "Authorization": "Bearer " + token }) 
+                                            .post("http://127.0.0.1:8000/api/settings/avatar-upload/", formData)
+                                            .then((res) => {
+                                                const response = res.json();
+                                                if (response && response.url) {
+                                                    let fullUrl = response.url;
+                                                    if (!fullUrl.startsWith("http")) {
+                                                        fullUrl = "http://127.0.0.1:8000" + fullUrl;
+                                                    }
+                                                    this.$scope.$$("avatar_preview").setValues({ src: fullUrl });
+                                                    webix.message({type:"success", text: "Photo saved!"});
+                                                }
+                                            })
+                                            .fail((err) => {
+                                                console.error("Upload Error:", err);
+                                                webix.message({type:"error", text: "Upload failed. Please login again."});
+                                            });
+                                        return false; 
                                     }
                                 }
                             },
@@ -121,14 +125,26 @@ export default class SettingsView extends JetView {
                             }
                         ]
                     },
-                    {} 
+                    {}
                 ]
             },
             { height: 20 },
 
             // 2. Basic Details
             { template: "BASIC INFORMATION", type: "header", align: "left", },
-            { view: "text", label: "Username", name: "username", localId: "username", placeholder: "e.g. jdoe123", labelWidth: 150, readonly: true },
+            
+            { 
+                view: "text", 
+                label: "Username", 
+                name: "username", 
+                localId: "username", 
+                placeholder: "e.g. jdoe123", 
+                labelWidth: 150, 
+                fillspace: true,
+                readonly: true, 
+                inputAlign: "left",
+                css: "readonly_field" 
+            },
         
             { 
                 view: "text", 
@@ -137,19 +153,17 @@ export default class SettingsView extends JetView {
                 localId: "display_name", 
                 placeholder: "e.g. John Doe", 
                 labelWidth: 150, 
+                fillspace: true, 
                 readonly: true,
                 validate: (value) => /^[a-zA-Z\s]*$/.test(value), 
                 invalidMessage: "Name must contain letters only",
-                on: {
-                    onTimedKeyPress: function() {
-                        this.validate(); 
-                    }
-                }
+                on: { onTimedKeyPress: function() { this.validate(); } }
             },
             
             { 
                 view: "datepicker", label: "Date of Birth", name: "dob", localId: "dob", 
                 placeholder: "Select Date", labelWidth: 150, disabled: true, 
+                fillspace: true, 
                 stringResult: true, format: "%Y-%m-%d" 
             },
             
@@ -160,47 +174,43 @@ export default class SettingsView extends JetView {
                 customRadio: false
             },
 
-            { view: "textarea", label: "Bio", name: "bio", localId: "bio", height: 100, placeholder: "Tell us a little about yourself...", labelWidth: 150, readonly: true },
+            { 
+                view: "textarea", label: "Bio", name: "bio", localId: "bio", 
+                height: 100, placeholder: "Tell us a little about yourself...", 
+                labelWidth: 150, readonly: true,
+                fillspace: true 
+            },
 
             // 3. Contact Info 
             { template: "CONTACT INFORMATION", type: "header", align: "left" },
             
             { 
-                view: "text", 
-                label: "Email Address", 
-                name: "email", 
-                localId: "email", 
-                placeholder: "user@example.com", 
-                labelWidth: 150, 
-                readonly: true,
-                validate: webix.rules.isEmail,
-                invalidMessage: "Invalid email format",
-                on: {
-                    onTimedKeyPress: function() {
-                        this.validate();
-                    }
-                }
+                view: "text", label: "Email Address", name: "email", localId: "email", 
+                placeholder: "user@example.com", labelWidth: 150, readonly: true,
+                fillspace: true, 
+                validate: webix.rules.isEmail, invalidMessage: "Invalid email format",
+                on: { onTimedKeyPress: function() { this.validate(); } }
             },
             
-            { view: "combo", label: "Country", name: "country", localId: "country", placeholder: "Select country", labelWidth: 150, disabled: true, suggest: { body: { yCount: 5, autoWidth: false, data: countries } } },
+            { 
+                view: "combo", label: "Country", name: "country", localId: "country", 
+                placeholder: "Select country", labelWidth: 150, disabled: true, 
+                fillspace: true, 
+                suggest: { body: { yCount: 5, autoWidth: true, data: countries } } 
+            },
             {
                 cols: [
-                    { view: "combo", label: "Phone Number", name: "phone_code", localId: "phone_code", placeholder: "Code", labelWidth: 150, width: 260, disabled: true, suggest: { body: { yCount: 5, autoWidth: false, data: countryCodes } } },
+                    { 
+                        view: "combo", label: "Phone Number", name: "phone_code", localId: "phone_code", 
+                        placeholder: "Code", labelWidth: 150, width: 260, disabled: true, 
+                        suggest: { body: { yCount: 5, autoWidth: false, data: countryCodes } } 
+                    },
                     { width: 10 },
                     { 
-                        view: "text", 
-                        name: "phone_number", 
-                        localId: "phone_number", 
-                        placeholder: "1234567890", 
-                        fillspace: true, 
-                        readonly: true,
-                        validate: (value) => /^\d*$/.test(value),
-                        invalidMessage: "Numbers only",
-                        on: {
-                            onTimedKeyPress: function() {
-                                this.validate();
-                            }
-                        }
+                        view: "text", name: "phone_number", localId: "phone_number", 
+                        placeholder: "1234567890", fillspace: true, readonly: true,
+                        validate: (value) => /^\d*$/.test(value), invalidMessage: "Numbers only",
+                        on: { onTimedKeyPress: function() { this.validate(); } }
                     }
                 ]
             },
@@ -209,54 +219,50 @@ export default class SettingsView extends JetView {
             // ACTION BUTTONS
             { 
                 cols: [
-                    {}, 
                     { view: "button", localId: "btn_edit", value: "Edit Profile", css: "webix_primary", width: 150, click: () => this.toggleEditMode(true) },
                     { view: "button", localId: "btn_cancel", value: "Cancel", width: 100, hidden: true, click: () => this.toggleEditMode(false) },
                     { width: 10 },
-                    { view: "button", localId: "btn_save", value: "Save Changes", css: "webix_primary", width: 150, hidden: true, click: () => this.saveProfileChanges() }
+                    { view: "button", localId: "btn_save", value: "Save Changes", css: "webix_primary", width: 150, hidden: true, click: () => this.saveProfileChanges() },
+                    {} 
                 ]
             }
         ];
         
-        //SECTION 2: PASSWORD AND SECURITY
         const securityElements = [
             { template: "PASSWORD & SECURITY", type: "header", align: "left" },
-            { view: "button", value: "Change Password", css: "webix_primary", width: 200, align: "left", click: () => this.showPasswordWindow() }
+            { 
+                cols: [
+                    { view: "button", value: "Change Password", css: "webix_primary", width: 200, align: "left", click: () => this.showPasswordWindow() },
+                    {} 
+                ]
+            }
         ];
 
-        //MAIN CONFIGURATION 
+        // MAIN CONFIGURATION 
         return {
             view: "scrollview", scroll: "y",
             body: {
-                cols: [
-                    {}, 
-                    {
-                        view: "form", 
-                        localId: "mainForm", 
-                        width: 900, 
-                        borderless: true, 
-                        padding: {top: 20, right: 30, bottom: 20, left: 30},
-                        elementsConfig: { labelWidth: 150, bottomPadding: 18 },
-                        
-                        elements: [
-                            { rows:[
-                                { template: "Account Settings", type: "header", borderless: true, css: "webix_header_l", align: "left" },
-                                { template: "Manage your profile, contact info, and security credentials", height: 35, borderless: true, css: "webix_el_label", style: "color: #888;", align: "left" }
-                            ]},
-                            { height: 20 },
-                            ...profileElements,
-                            { height: 10 },
-                            ...securityElements,
-                            { height: 20 }
-                        ]
-                    },
-                    {} 
+                view: "form", 
+                localId: "mainForm", 
+                borderless: true, 
+                padding: {top: 20, right: 30, bottom: 20, left: 30},
+                elementsConfig: { labelWidth: 150, bottomPadding: 18 },
+                
+                elements: [
+                    { rows:[
+                        { template: "Account Settings", type: "header", borderless: true, css: "webix_header_l", align: "left" },
+                        { template: "Manage your profile, contact info, and security credentials", height: 35, borderless: true, css: "webix_el_label", style: "color: #888;", align: "left" }
+                    ]},
+                    { height: 20 },
+                    ...profileElements,
+                    { height: 10 },
+                    ...securityElements,
+                    { height: 20 }
                 ]
             }
         };
     }
 
-    //API Load Method 
     loadProfileData() {
         webix.ajax().get("http://127.0.0.1:8000/api/settings/profile/").then(response => {
             const data = response.json();
@@ -292,7 +298,6 @@ export default class SettingsView extends JetView {
         });
     }
 
-    //API Save
     saveProfileChanges() {
         const form = this.$$("mainForm");
         
@@ -324,7 +329,7 @@ export default class SettingsView extends JetView {
     }
 
     toggleEditMode(enable) {
-        const textFields = ["username", "display_name", "bio", "email", "phone_number"];
+        const textFields = ["display_name", "bio", "email", "phone_number"];
         const comboFields = ["country", "phone_code", "dob", "gender"];
 
         textFields.forEach(id => {

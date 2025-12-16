@@ -1,18 +1,29 @@
 import {JetView} from "webix-jet";
+import * as webix from "webix";
 
 export default class ThemeSettingsView extends JetView {
+    
+    // --- 1. Helper to get the correct User Key ---
+    getStorageKey() {
+        const userId = webix.storage.local.get("current_user_id") || "guest";
+        return `app_settings_${userId}`;
+    }
+
     init() {
-        let settings = JSON.parse(localStorage.getItem("app_settings"));
-        
-        if (!settings) {
-            settings = {
-                theme_mode: "light",
-                font_size: 14,
-                font_family: "default",
-                accent_color: "#1CA1C1",
-                high_contrast: 0
-            };
-        }
+        // 2. Define Defaults
+        const defaults = {
+            theme_mode: "light",
+            font_size: 14,
+            font_family: "default",
+            accent_color: "#1CA1C1",
+            high_contrast: 0
+        };
+
+        const key = this.getStorageKey();
+        const saved = JSON.parse(localStorage.getItem(key)) || {};
+
+        const settings = { ...defaults, ...saved };
+
         this.$$("themeForm").setValues(settings);
         this.toggleDarkMode(settings.theme_mode);
         this.updateFontSize(settings.font_size);
@@ -187,7 +198,8 @@ export default class ThemeSettingsView extends JetView {
 
     autoSave() {
         const values = this.$$("themeForm").getValues();
-        localStorage.setItem("app_settings", JSON.stringify(values));
+        const key = this.getStorageKey();
+        localStorage.setItem(key, JSON.stringify(values));
     }
 
     toggleDarkMode(mode) {

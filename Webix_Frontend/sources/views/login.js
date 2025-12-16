@@ -142,15 +142,25 @@ export default class LoginView extends JetView {
             .then((res) => {
                 const result = res.json();
                 webix.storage.local.put("token", result.access); 
+                let userId = "guest";
+
+                if (result.user_id) {
+                    userId = result.user_id;
+                } else if (result.username) {
+                    userId = result.username.toLowerCase();
+                } else {
+                    userId = data.username.toLowerCase();
+                }
+
+                webix.storage.local.put("current_user_id", userId);
+                
+                console.log("Saving Settings for User ID:", userId);
+
                 webix.message({ type: "success", text: "Login Successful" });
                 this.getRoot().close();
 
-                try {
-                    this.app.show("/settings/account"); 
-                } catch(e) {
-                    console.error("Navigation Error:", e);
-                    webix.message({ type:"error", text: "Login worked, but could not load Settings page." });
-                }
+                window.location.href = "#!/settings/account";
+                window.location.reload(); 
             })
             .catch((err) => {
                 console.error("Login Error:", err);
@@ -158,7 +168,6 @@ export default class LoginView extends JetView {
             });
         }
     }
-
     doRegister() {
         const form = this.$$("registerForm");
         if (form.validate()) {

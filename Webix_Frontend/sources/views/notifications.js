@@ -41,7 +41,7 @@ export default class NotificationSettingsView extends JetView {
 
                             { template: "EMAIL NOTIFICATIONS", type: "header", css: { "text-align": "left", "font-size": "18px" } },
                             {
-                                view: "switch",
+                                view: "checkbox",
                                 label: "Enable Email Notifications",
                                 name: "email_enabled",
                                 value: 1,
@@ -77,7 +77,7 @@ export default class NotificationSettingsView extends JetView {
                             { height: 10 },
                             { template: "NOTIFICATION SOUND", type: "header", css: { "text-align": "left", "font-size": "18px" } },
                             {
-                                view: "switch",
+                                view: "checkbox",
                                 label: "Play sound for notifications",
                                 name: "sound_enabled",
                                 value: 1,

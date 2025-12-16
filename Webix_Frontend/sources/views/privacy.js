@@ -68,7 +68,7 @@ export default class PrivacySettingsView extends JetView {
 
                             // PERSONALIZED RECOMMENDATIONS
                             { 
-                                view: "switch",
+                                view: "checkbox",
                                 name: "personalized_recommendations",
                                 label: "Allow personalized recommendations",
                                 value: 1
@@ -79,7 +79,7 @@ export default class PrivacySettingsView extends JetView {
                             // TWO-FACTOR AUTHENTICATION
                             { template: "Two-Factor Authentication", type: "header", css: { "text-align": "center", "font-size": "18px" } },
                             {
-                                view: "switch",
+                                view: "checkbox",
                                 name: "two_factor",
                                 localId: "two_factor",
                                 label: "Enable two-factor authentication (2FA)",

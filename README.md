@@ -58,37 +58,35 @@ This system provides user account management including authentication, profile c
 ---
 
 ## Project Structure Overview
+## Project Structure Overview
 
 project-root/
 ├── Django_Backend/
-│   ├── user_preferences/        # Django project (settings, URLs, WSGI)
-│   ├── settings_api/            # REST API app (auth, profile, password, avatar)
-│   │   ├── models.py            # UserProfile model
-│   │   ├── serializers.py       # Profile, register, change password serializers
-│   │   ├── views.py             # Register, login (via SimpleJWT), profile, change password, avatar upload
-│   │   ├── urls.py              # API routes under /api/settings/
-│   │   └── migrations/          # Database migrations
-│   ├── media/
-│   │   └── avatars/             # Stored avatar images
-│   ├── manage.py
-│   ├── Pipfile
-│   └── Pipfile.lock
-│
+│   ├── user_preferences/      # Django project (settings, URLs, WSGI)
+│   ├── settings_api/          # REST API app (auth, profile, password, avatar)
+│   ├── models.py              # UserProfile model
+│   ├── serializers.py         # Profile, register, change password serializers
+│   ├── urls.py                # API routes under /api/settings/
+│   ├── migrations/            # Database migrations
+│   ├── media/                 # Uploaded media files (avatars)
+│   ├── avatars/               # Stored avatar images
+│   ├── manage.py              # Django management script
+│   ├── Pipfile                # Dependency management
+│   └── Pipfile.lock           # Dependency lock file
 ├── Webix_Frontend/
-│   ├── index.html               # App entry HTML
+│   ├── index.html             # App entry HTML
 │   ├── sources/
-│   │   ├── myapp.js             # Main Webix Jet app (routing, auth guard, theme restore)
-│   │   ├── locales/             # i18n files
-│   │   ├── models/              # Example data models
-│   │   ├── services/            # Notification, privacy, theme helpers (frontend)
-│   │   ├── views/               # UI views (login, settings, account, theme, privacy, notifications, etc.)
-│   │   └── styles/              # CSS files (app, login, account, settings, theme)
-│   ├── package.json
-│   ├── package-lock.json
-│   └── README.md                # Frontend-specific instructions
-│
-├── Postman_API_testing.json     # (Optional) Postman collection for API testing
-└── README.md                    # This file---
+│   │   ├── myapp.js           # Main Webix Jet app (routing, auth guard, theme restore)
+│   │   ├── locales/           # i18n files
+│   │   ├── models/            # Example data models
+│   │   ├── views/             # UI views (login, settings, account, theme, privacy)
+│   │   ├── services/          # Notification, privacy, theme helpers (frontend)
+│   │   └── styles/            # CSS files
+│   ├── package.json           # Frontend dependencies
+│   └── package-lock.json      # Dependency lock file
+├
+└── README.md                 # Frontend-specific instructions
+
 
 ## Backend Setup
 

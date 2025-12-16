@@ -42,7 +42,7 @@ export default class ThemeSettingsView extends JetView {
                                 ]
                             },
                             { height: 20 },
-                            { template: "APPEARANCE", type: "section" },
+                            { template: "APPEARANCE", type: "header" },
                             {
                                 paddingY: 10,
                                 rows: [
@@ -67,7 +67,7 @@ export default class ThemeSettingsView extends JetView {
                             },
 
                             { height: 10 },
-                            { template: "TYPOGRAPHY", type: "section" },
+                            { template: "TYPOGRAPHY", type: "header" },
                             {
                                 cols: [
                                     {
@@ -112,7 +112,7 @@ export default class ThemeSettingsView extends JetView {
                                 }
                             },
                             { height: 20 },
-                            { template: "ACCENT COLOR", type: "section" },
+                            { template: "ACCENT COLOR", type: "header" },
                             {
                                 cols: [
                                     {
@@ -136,7 +136,7 @@ export default class ThemeSettingsView extends JetView {
                                 ]
                             },
                             { height: 10 },
-                            { template: "ACCESSIBILITY", type: "section" },
+                            { template: "ACCESSIBILITY", type: "header" },
                             {
                                 cols: [
                                     {
@@ -217,10 +217,12 @@ export default class ThemeSettingsView extends JetView {
         if (type === "serif") fontStack = "Georgia, serif";
         if (type === "mono")  fontStack = "'Courier New', monospace";
         if (type === "sans")  fontStack = "Arial, sans-serif";
-        document.body.style.fontFamily = fontStack;
+        
+        document.documentElement.style.setProperty('--app-font-family', fontStack);
     }
 
     updateAccentColor(color) {
+        document.documentElement.style.setProperty('--app-accent-color', color);
     }
 
     toggleHighContrast(enabled) {
@@ -238,7 +240,7 @@ export default class ThemeSettingsView extends JetView {
             theme_mode: "light",
             font_size: 14,
             font_family: "default",
-            accent_color: "#1CA1C1",
+            accent_color: "#1CA1C1", 
             high_contrast: 0
         };
 

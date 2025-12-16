@@ -37,7 +37,7 @@ export default class PrivacySettingsView extends JetView {
                             { height: 20 },
 
                             // ACCOUNT PRIVACY
-                            { template: "Account Privacy", type: "section", css: { "text-align": "center", "font-size": "18px" } },
+                            { template: "Account Privacy", type: "header", css: { "text-align": "left", "font-size": "18px" } },
                             {
                                 view: "radio",
                                 name: "account_privacy",
@@ -52,7 +52,7 @@ export default class PrivacySettingsView extends JetView {
                             { height: 20 },
 
                             // ACTIVITY STATUS
-                            { template: "Activity Status", type: "section", css: { "text-align": "center", "font-size": "18px" } },
+                            { template: "Activity Status", type: "header", css: { "text-align": "left", "font-size": "18px" } },
                             {
                                 view: "switch",
                                 name: "show_activity",
@@ -73,7 +73,7 @@ export default class PrivacySettingsView extends JetView {
                             { height: 20 },
 
                             // TWO-FACTOR AUTHENTICATION
-                            { template: "Two-Factor Authentication", type: "section", css: { "text-align": "center", "font-size": "18px" } },
+                            { template: "Two-Factor Authentication", type: "header", css: { "text-align": "center", "font-size": "18px" } },
                             {
                                 view: "switch",
                                 name: "two_factor",

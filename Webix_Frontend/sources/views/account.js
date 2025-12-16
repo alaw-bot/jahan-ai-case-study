@@ -48,12 +48,35 @@ export default class SettingsView extends JetView {
         ];
 
         const profileElements = [
-            {
-                rows: [
-                    { view: "label", label: "Profile Information", css: "section_header", align: "left" },
-                    { view: "label", label: "Update your photo and personal details", css: "section_subtitle", align: "left" }
-                ]
-            },
+            // {
+            //     css: { 
+            //         "background-color": "rgba(127, 127, 127, 0.1)", // Adaptive background
+            //         "border-radius": "8px", 
+            //         "padding": "15px", 
+            //         "margin-bottom": "20px" 
+            //     }, 
+            //     rows: [
+            //         { 
+            //             template: "Privacy Settings", 
+            //             type: "clean", 
+            //             autoheight: true, 
+            //             css: { 
+            //                 "font-size": "24px", 
+            //                 "font-weight": "600"
+    
+            //             } 
+            //         },
+            //         { 
+            //             template: "Control your privacy and data sharing preferences", 
+            //             type: "clean", 
+            //             height: 25, 
+            //             css: { 
+            //                 "opacity": ".7", // Opacity -> adapts to Theme brightness
+            //                 "font-size": "14px" 
+            //             } 
+            //         }
+            //     ]
+            // },
             { height: 20 },
             {
                 cols: [
@@ -71,25 +94,42 @@ export default class SettingsView extends JetView {
                                 view: "uploader", 
                                 value: "Upload New Photo", 
                                 localId: "photo_uploader", 
-                                upload: "http://127.0.0.1:8000/api/settings/avatar-upload/", 
-                                autosend: true, 
+                                
+                                autosend: false,                
                                 name: "upload", 
                                 accept: "image/*", 
                                 width: 160, 
                                 css: "webix_primary",
                                 on: {
-                                    onFileUpload: (file, response) => {
-                                        if (response && response.url) {
-                                            let fullUrl = response.url;
-                                            if (!fullUrl.startsWith("http")) {
-                                                fullUrl = "http://127.0.0.1:8000" + fullUrl;
-                                            }
-                                            this.$$("avatar_preview").setValues({ src: fullUrl });
-                                            webix.message({type:"success", text: "Photo saved!"});
-                                        }
-                                    },
-                                    onUploadFail: (file, response) => {
-                                         webix.message({type:"error", text: "Upload failed."});
+                                    onAfterFileAdd: function(item){
+                                        const file = item.file;
+                                        const token = webix.storage.local.get("token");
+
+                                        const formData = new FormData();
+                                        formData.append("upload", file);
+
+                                        webix.ajax()
+                                            .headers({ "Authorization": "Bearer " + token }) 
+                                            .post("http://127.0.0.1:8000/api/settings/avatar-upload/", formData)
+                                            .then((res) => {
+                                                const response = res.json();
+
+                                                if (response && response.url) {
+                                                    let fullUrl = response.url;
+                                                    if (!fullUrl.startsWith("http")) {
+                                                        fullUrl = "http://127.0.0.1:8000" + fullUrl;
+                                                    }
+                                                    
+                                                    this.$scope.$$("avatar_preview").setValues({ src: fullUrl });
+                                                    webix.message({type:"success", text: "Photo saved!"});
+                                                }
+                                            })
+                                            .fail((err) => {
+                                                webix.message({type:"error", text: "Upload failed."});
+                                                console.error("Upload Error:", err);
+                                            });
+                                            
+                                        return false; 
                                     }
                                 }
                             },

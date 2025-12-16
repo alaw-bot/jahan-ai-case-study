@@ -4,7 +4,6 @@ import "../styles/login.css";
 
 export default class LoginView extends JetView {
 
-
     checkPasswordStrength(password) {
         let strength = 0;
         if (password.length >= 8) strength++;
@@ -37,7 +36,6 @@ export default class LoginView extends JetView {
         return html;
     }
 
-
     config() {
         const loginForm = {
             view: "form", localId: "loginForm",
@@ -47,20 +45,16 @@ export default class LoginView extends JetView {
                 { template: "<span class='header_title'>Sign in</span>", height: 50, borderless: true },
                 { template: "<span class='sub_title'>Welcome back to MyApp</span>", height: 30, borderless: true },
                 { height: 30 },
-                
                 { 
                     view: "text", label: "Username or Email", name: "username", 
                     labelPosition: "top", placeholder: "Enter your username", 
-                    invalidMessage: "Required", css: "modern_input",
-                    height: 90 
+                    invalidMessage: "Required", css: "modern_input", height: 90 
                 },
                 { 
                     view: "text", type: "password", label: "Password", name: "password", 
                     labelPosition: "top", placeholder: "••••••••", 
-                    invalidMessage: "Required", css: "modern_input",
-                    height: 90 
+                    invalidMessage: "Required", css: "modern_input", height: 90 
                 },
-                
                 { template: "<a href='#' class='forgot_link'>Forgot password?</a>", height: 20, borderless: true, css: "text_right" },
                 { height: 20 },
                 { view: "button", value: "Sign in", css: "webix_primary teal_button", height: 50, click: () => this.doLogin() },
@@ -77,7 +71,6 @@ export default class LoginView extends JetView {
                 { template: "<span class='header_title'>Create Account</span>", height: 50, borderless: true },
                 { template: "<span class='sub_title'>Start your journey with us</span>", height: 30, borderless: true },
                 { height: 20 },
-                
                 { view: "text", label: "Username", name: "username", labelPosition: "top", placeholder: "Choose a username", invalidMessage: "Required", css: "modern_input", height: 90 },
                 { view: "text", label: "Email", name: "email", labelPosition: "top", placeholder: "name@company.com", invalidMessage: "Invalid Email", css: "modern_input", height: 90 },
                 { 
@@ -92,13 +85,13 @@ export default class LoginView extends JetView {
                 },
                 { view: "template", localId: "reg_feedback", height: 90, borderless: true, css: "strength_container", template: "" },
                 { view: "text", type: "password", label: "Confirm Password", name: "confirm_password", labelPosition: "top", placeholder: "Repeat password", invalidMessage: "Required", css: "modern_input", height: 90 },
-                
                 { height: 10 },
                 { view: "button", value: "Register", css: "webix_primary teal_button", height: 50, click: () => this.doRegister() },
                 { height: 20 },
                 { template: "Already have an account? <span class='switch_link'>Sign in</span>", height: 30, borderless: true, css: "text_center switch_text", onClick: { "switch_link": () => this.toggleForm("login") } }
             ]
         };
+
 
         return {
             css: "login_page_bg",
@@ -147,7 +140,9 @@ export default class LoginView extends JetView {
             ]
         };
     }
+
     init(){ this.getRoot().show(); }
+
     toggleForm(mode) {
         if (mode === "login") {
             this.$$("loginForm").show();
@@ -157,53 +152,94 @@ export default class LoginView extends JetView {
             this.$$("registerForm").show();
         }
     }
+
     doLogin() { 
         const form = this.$$("loginForm");
         if (form.validate()) {
             const data = form.getValues();
             
-            webix.ajax().post("http://127.0.0.1:8000/api/settings/login/", data)
-            .then((res) => {
-                const result = res.json();
-                webix.storage.local.put("token", result.access); 
-                let userId = "guest";
-                if (result.user_id) userId = result.user_id;
-                else if (result.username) userId = result.username.toLowerCase();
-                else userId = data.username.toLowerCase();
+            webix.ajax()
+                .headers({ "Content-Type": "application/json" })
+                .post("http://127.0.0.1:8000/api/settings/login/", JSON.stringify(data))
+                .then((res) => {
+                    const result = res.json();
+                    webix.storage.local.put("token", result.access); 
 
-                webix.storage.local.put("current_user_id", userId);
-                
-                console.log("Saving Settings for User ID:", userId);
-                webix.message({ type: "success", text: "Login Successful" });
+                    let userId = "guest";
+                    if (result.user_id) userId = result.user_id;
+                    else if (result.username) userId = result.username.toLowerCase();
+                    else userId = data.username.toLowerCase();
 
-                window.location.href = "#!/settings/account";
-                window.location.reload(); 
-            })
-            .catch((err) => {
-                console.error("Login Error:", err);
-                webix.message({ type: "error", text: "Invalid Username or Password" });
-            });
+                    webix.storage.local.put("current_user_id", userId);
+                    webix.message({ type: "success", text: "Login Successful" });
+
+                    window.location.href = "#!/settings/account";
+                    window.location.reload(); 
+                })
+                .catch((err) => {
+                    let msg = "Invalid Username or Password";
+                    try {
+                        if (err.response) {
+                            const json = JSON.parse(err.response);
+                            if (json.detail) msg = json.detail;
+                        }
+                    } catch(e) {}
+                    
+                    webix.alert({
+                        type: "alert-error",
+                        title: "Login Failed",
+                        text: msg,
+                        ok: "Try Again"
+                    });
+                });
         }
     }
+
     doRegister() { 
         const form = this.$$("registerForm");
         if (form.validate()) {
             const data = form.getValues();
-            if(data.password !== data.confirm_password){ webix.message({type:"error", text: "Passwords do not match"}); return; }
-            if (this.checkPasswordStrength(data.password).css === "weak") { webix.message({ type: "error", text: "Password is too weak." }); return; }
-            webix.ajax().post("http://127.0.0.1:8000/api/settings/register/", data).then(() => {
-                webix.message({ type: "success", text: "Registration Successful! Please Login." });
-                this.$$("loginForm").show();
-                this.$$("registerForm").hide();
-                form.clear();
-                this.$$("reg_feedback").setHTML(""); 
-            }).fail((err) => {
-                const response = err.json();
-                let msg = "Registration Failed";
-                if(response.username) msg = "Username: " + response.username[0];
-                else if(response.email) msg = "Email: " + response.email[0];
-                webix.message({ type: "error", text: msg });
-            });
+            if(data.password !== data.confirm_password){ 
+                webix.alert({ type:"alert-error", title: "Error", text: "Passwords do not match" }); 
+                return; 
+            }
+            if (this.checkPasswordStrength(data.password).css === "weak") { 
+                webix.alert({ type: "alert-error", title: "Weak Password", text: "Password is too weak." }); 
+                return; 
+            }
+            
+            webix.ajax()
+                .headers({ "Content-Type": "application/json" })
+                .post("http://127.0.0.1:8000/api/settings/register/", JSON.stringify(data))
+                .then(() => {
+                    webix.alert({ 
+                        title: "Success", 
+                        text: "Registration Successful! Please Login.", 
+                        type: "alert-success",
+                        callback: () => {
+                            this.$$("loginForm").show();
+                            this.$$("registerForm").hide();
+                            form.clear();
+                            this.$$("reg_feedback").setHTML(""); 
+                        }
+                    });
+                })
+                .fail((err) => {
+                    let response = {};
+                    try { response = JSON.parse(err.response); } catch(e) { console.error(err); }
+
+                    let msg = "Registration Failed";
+                    if(response.username) msg = response.username[0];
+                    else if(response.email) msg = response.email[0];
+                    else if(response.detail) msg = response.detail;
+                    
+                    webix.alert({
+                        type: "alert-error",
+                        title: "Registration Error",
+                        text: msg,
+                        ok: "Close"
+                    });
+                });
         }
     }
 }

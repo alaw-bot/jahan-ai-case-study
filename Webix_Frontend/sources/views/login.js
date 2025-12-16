@@ -37,6 +37,44 @@ export default class LoginView extends JetView {
     }
 
     config() {
+
+        const togglePasswordVisibility = function(isNewPass = false) {
+            const currentValue = this.getValue();
+            const input = this.getInputNode();
+            
+            if (!input) return false;
+
+            if (input.type === "password") {
+                input.type = "text";
+                this.config.type = "text";
+                const iconEl = this.$view.querySelector(".webix_input_icon");
+                if (iconEl) {
+                    iconEl.innerHTML = '<span class="mdi mdi-eye-off"></span>';
+                }
+                this.define({ type: "text", icon: "mdi mdi-eye-off" });
+            } else {
+                input.type = "password";
+                this.config.type = "password";
+                const iconEl = this.$view.querySelector(".webix_input_icon");
+                if (iconEl) {
+                    iconEl.innerHTML = '<span class="mdi mdi-eye"></span>';
+                }
+                this.define({ type: "password", icon: "mdi mdi-eye" });
+            }
+            
+            if (currentValue !== null && currentValue !== undefined) {
+                this.setValue(currentValue);
+            }
+            
+            this.refresh();
+            
+            if (isNewPass) {
+                this.callEvent("onTimedKeyPress");
+            }
+            return false;
+        };
+
+
         const loginForm = {
             view: "form", localId: "loginForm",
             padding: 0, borderless: true,
@@ -47,13 +85,31 @@ export default class LoginView extends JetView {
                 { height: 30 },
                 { 
                     view: "text", label: "Username or Email", name: "username", 
+                    localId: "login_username", 
                     labelPosition: "top", placeholder: "Enter your username", 
                     invalidMessage: "Required", css: "modern_input", height: 90 
                 },
                 { 
                     view: "text", type: "password", label: "Password", name: "password", 
+                    localId: "login_pass", 
                     labelPosition: "top", placeholder: "••••••••", 
-                    invalidMessage: "Required", css: "modern_input", height: 90 
+                    invalidMessage: "Required", css: "modern_input", height: 90,
+                    icon: "mdi mdi-eye", 
+                    iconWidth: 40,
+                    on: {
+                        onIconClick: togglePasswordVisibility,
+                        onAfterRender: function() {
+                            const iconEl = this.$view.querySelector(".webix_input_icon");
+                            if (iconEl) {
+                                iconEl.style.cursor = "pointer";
+                                iconEl.onclick = (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    togglePasswordVisibility.call(this, false);
+                                };
+                            }
+                        }
+                    }
                 },
                 { template: "<a href='#' class='forgot_link'>Forgot password?</a>", height: 20, borderless: true, css: "text_right" },
                 { height: 20 },
@@ -73,18 +129,60 @@ export default class LoginView extends JetView {
                 { height: 20 },
                 { view: "text", label: "Username", name: "username", labelPosition: "top", placeholder: "Choose a username", invalidMessage: "Required", css: "modern_input", height: 90 },
                 { view: "text", label: "Email", name: "email", labelPosition: "top", placeholder: "name@company.com", invalidMessage: "Invalid Email", css: "modern_input", height: 90 },
+
                 { 
                     view: "text", type: "password", label: "Password", name: "password", labelPosition: "top", placeholder: "Strong password", invalidMessage: "Required", css: "modern_input", height: 90,
                     localId: "reg_pass",
-                    on: { onTimedKeyPress: () => { 
-                        const form = this.$$("registerForm"); const val = form.queryView({ localId: "reg_pass" }).getValue(); 
-                        const strength = this.checkPasswordStrength(val); const reqsHTML = this.getRequirementsHTML(val); 
-                        const html = `<div class="strength_text ${strength.css}">${strength.text}</div><div class="strength_bar ${strength.css}"></div>${reqsHTML}`; 
-                        const feedback = form.queryView({ localId: "reg_feedback" }); if(feedback) feedback.setHTML(html); 
-                    } }
+                    icon: "mdi mdi-eye", 
+                    iconWidth: 40,
+                    on: { 
+                        onIconClick: function() {
+                            togglePasswordVisibility.call(this, true); 
+                        },
+                        onAfterRender: function() {
+                            const iconEl = this.$view.querySelector(".webix_input_icon");
+                            if (iconEl) {
+                                iconEl.style.cursor = "pointer";
+                                iconEl.onclick = (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    togglePasswordVisibility.call(this, true);
+                                };
+                            }
+                        },
+                        onTimedKeyPress: () => { 
+                            const form = this.$$("registerForm"); 
+                            const val = form.queryView({ localId: "reg_pass" }).getValue(); 
+                            const strength = this.checkPasswordStrength(val); 
+                            const reqsHTML = this.getRequirementsHTML(val); 
+                            const html = `<div class="strength_text ${strength.css}">${strength.text}</div><div class="strength_bar ${strength.css}"></div>${reqsHTML}`; 
+                            const feedback = form.queryView({ localId: "reg_feedback" }); 
+                            if(feedback) feedback.setHTML(html); 
+                        } 
+                    }
                 },
                 { view: "template", localId: "reg_feedback", height: 90, borderless: true, css: "strength_container", template: "" },
-                { view: "text", type: "password", label: "Confirm Password", name: "confirm_password", labelPosition: "top", placeholder: "Repeat password", invalidMessage: "Required", css: "modern_input", height: 90 },
+                
+                { 
+                    view: "text", type: "password", label: "Confirm Password", name: "confirm_password", labelPosition: "top", placeholder: "Repeat password", invalidMessage: "Required", css: "modern_input", height: 90,
+                    localId: "reg_confirm_pass", 
+                    icon: "mdi mdi-eye", 
+                    iconWidth: 40,
+                    on: {
+                        onIconClick: togglePasswordVisibility,
+                        onAfterRender: function() {
+                            const iconEl = this.$view.querySelector(".webix_input_icon");
+                            if (iconEl) {
+                                iconEl.style.cursor = "pointer";
+                                iconEl.onclick = (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    togglePasswordVisibility.call(this, false);
+                                };
+                            }
+                        }
+                    }
+                },
                 { height: 10 },
                 { view: "button", value: "Register", css: "webix_primary teal_button", height: 50, click: () => this.doRegister() },
                 { height: 20 },
@@ -141,15 +239,30 @@ export default class LoginView extends JetView {
         };
     }
 
-    init(){ this.getRoot().show(); }
+    init(){ 
+        this.getRoot().show(); 
+    }
 
     toggleForm(mode) {
         if (mode === "login") {
             this.$$("loginForm").show();
             this.$$("registerForm").hide();
+            this.$$("registerForm").clearValidation(); 
         } else {
             this.$$("loginForm").hide();
             this.$$("registerForm").show();
+            this.$$("loginForm").clearValidation(); 
+            
+            this.$$("reg_feedback").setHTML(""); 
+            
+            const fields = ["reg_pass", "reg_confirm_pass"];
+            fields.forEach(localId => {
+                const field = this.$$(localId);
+                if (field) {
+                    field.define({ type: "password", icon: "mdi mdi-eye" });
+                    field.refresh();
+                }
+            });
         }
     }
 

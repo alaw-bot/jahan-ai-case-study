@@ -58,16 +58,15 @@ export default class SettingsView extends JetView {
 
         const profileElements = [
             {
-                rows: [
-                    { view: "label", label: "Profile Information", css: "section_header", align: "left" },
-                    { view: "label", label: "Update your photo and personal details", css: "section_subtitle", align: "left" }
-                ]
-            },
-            { height: 20 },
-            {
                 cols: [
                     {
-                        view: "template", localId: "avatar_preview", borderless: true, width: 100, height: 100, css: "avatar_circle",
+                        view: "template", 
+                        localId: "avatar_preview", 
+                        borderless: true, 
+                        width: 100, 
+                        height: 100, 
+                        css: "avatar_circle",
+                        padding: 0, 
                         template: (obj) => {
                             if(obj.src) return `<img src="${obj.src}" class="avatar_img">`;
                             return `<div class="avatar_placeholder">U</div>`;

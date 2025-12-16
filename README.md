@@ -51,7 +51,7 @@ This system provides user account management including authentication, profile c
 
 ### Testing & Tools
 
-- **Django test framework** (backend unit/functional tests possible with `python manage.py test`)
+- Jest 
 - **Postman** for API testing
 - **ESLint** for frontend linting
 

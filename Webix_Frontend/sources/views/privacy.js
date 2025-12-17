@@ -82,7 +82,7 @@ export default class PrivacySettingsView extends JetView {
                                 view: "checkbox",
                                 name: "two_factor",
                                 localId: "two_factor",
-                                label: "Enable two-factor authentication (2FA)",
+                                label: "Enable two-factor authentication",
                                 value: 0,
                                 on: {
                                     onChange: (value) => {

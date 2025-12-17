@@ -58,7 +58,7 @@ export default class PrivacySettingsView extends JetView {
                             // ACTIVITY STATUS
                             { template: "Activity Status", type: "header", css: { "text-align": "left", "font-size": "18px" } },
                             {
-                                view: "switch",
+                                view: "checkbox",
                                 name: "show_activity",
                                 label: "Show when you're online",
                                 value: 1

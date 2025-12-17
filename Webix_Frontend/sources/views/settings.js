@@ -31,10 +31,10 @@ export default class SettingsPage extends JetView {
                             localId: "sideMenu",
                             select: true,
                             data: [
-                                { id: "account", value: "Account", icon: "wxi-user" },
-                                { id: "notifications", value: "Notifications", icon: "wxi-bell" },
-                                { id: "theme", value: "Theme", icon: "wxi-pencil" },
-                                { id: "privacy", value: "Privacy", icon: "wxi-theif" }
+                                { id: "account", value: "Account"},
+                                { id: "notifications", value: "Notifications"},
+                                { id: "theme", value: "Theme"},
+                                { id: "privacy", value: "Privacy" }
                             ],
                             on: {
                                 onAfterSelect: id => this.show(id)

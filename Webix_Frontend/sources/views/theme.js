@@ -157,7 +157,7 @@ export default class ThemeSettingsView extends JetView {
                                 ]
                             },
                             { 
-                                view: "switch", 
+                                view: "checkbox", 
                                 name: "high_contrast", 
                                 width: 60,
                                 on: {
